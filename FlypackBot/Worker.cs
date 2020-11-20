@@ -91,6 +91,7 @@ namespace FlypackBot
                     $"*Id*: {x.Identifier}\n" +
                     $"*Descripción*: {x.Description}\n" +
                     $"*Tracking*: {x.TrackingInformation}\n" +
+                    $"*Recibido*: {x.Delivered.ToShortDateString()}\n" +
                     $"*Peso*: {x.Weight} libras\n" +
                     $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
                 )

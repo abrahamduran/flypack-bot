@@ -80,7 +80,7 @@ namespace FlypackBot
         {
             var path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
             var packages = await _flypack.GetPackagesAsync(path);
-            return ParseMessageFor(packages);
+            return ParseMessageFor(packages, false);
         }
 
         // TODO: remove this command since it's only intended to be used for debugging purpose
@@ -90,12 +90,12 @@ namespace FlypackBot
             if (packages == null || !packages.Any())
                 _logger.LogWarning("Failed to retrieve packages with path: {Path}", _path);
 
-            return ParseMessageFor(packages);
+            return ParseMessageFor(packages, false);
         }
 
         public List<Package> GetPackages() => _currentPackages;
-        public string GetCurrentPackagesList() => ParseMessageFor(_currentPackages);
-        public string GetPreviousPackagesList() => ParseMessageFor(_previousPackages.Values.ToList());
+        public string GetCurrentPackagesList() => ParseMessageFor(_currentPackages, false);
+        public string GetPreviousPackagesList() => ParseMessageFor(_previousPackages.Values.ToList(), false);
 
 
         // TODO: remove this command since it's only intended to be used for debugging purpose
@@ -106,6 +106,61 @@ namespace FlypackBot
             _retriesCount = 0;
             _path = "";
             return "";
+        }
+
+        private List<Package> FilterPackages(IEnumerable<Package> packages)
+        {
+            var updatedPackages = packages.Except(_currentPackages).ToList();
+            _previousPackages = _currentPackages.ToDictionary(x => x.Identifier);
+            _currentPackages = packages.ToList();
+
+            if (updatedPackages.Any())
+            {
+                _logger.LogInformation("Found {PackagesCount} new packages at: {Time}", updatedPackages.Count, DateTime.Now.AddHours(-4));
+                _logger.LogInformation("New package's ID: {PackageIds}", string.Join(", ", updatedPackages.Select(x => x.Identifier).ToList()));
+            }
+            else
+                _logger.LogInformation("No new packages were found");
+
+            return updatedPackages;
+        }
+
+        private string ParseMessageFor(IEnumerable<Package> packages, bool isUpdate)
+        {
+            if (packages == null || !packages.Any())
+                return "⚠️ Lista de paquetes vacía ⚠️";
+
+            List<string> messages = new List<string>();
+            messages.Add($"*Estado de paquetes*");
+            if (packages.Count() > SIMPLE_PACKAGES_AMOUNT && !isUpdate)
+                messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
+
+            messages.Add("");
+
+            foreach (var package in packages)
+            {
+                var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
+                messages.Add($"*Id*: {package.Identifier}");
+                messages.Add($"*Descripción*: {description}");
+                messages.Add($"*Tracking*: {package.TrackingInformation}");
+
+                if (!isUpdate)
+                    messages.Add($"*Recibido*: {package.Delivered.ToShortDateString()}");
+
+                messages.Add($"*Peso*: {package.Weight} libras");
+
+                var previousStatus = _previousPackages.ContainsKey(package.Identifier)
+                    ? _previousPackages[package.Identifier].Status
+                    : package.Status;
+                if (previousStatus != package.Status)
+                    messages.Add($"*Estado*: {previousStatus.Description} → {package.Status.Description}, _{package.Status.Percentage}_");
+                else
+                    messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_");
+                messages.Add("");
+            }
+
+            messages.RemoveAt(messages.Count - 1);
+            return string.Join('\n', messages);
         }
 
         private async void LogFailedLogin(TelegramBotClient client, long channelIdentifier)
@@ -136,57 +191,6 @@ namespace FlypackBot
               text: $"⚠️ Too many failed login attemps ⚠️\nCheck logs for more details.",
               parseMode: ParseMode.Markdown
             );
-        }
-
-        private List<Package> FilterPackages(IEnumerable<Package> packages)
-        {
-            var updatedPackages = packages.Except(_currentPackages).ToList();
-            _previousPackages = _currentPackages.ToDictionary(x => x.Identifier);
-            _currentPackages = packages.ToList();
-
-            if (updatedPackages.Any())
-            {
-                _logger.LogInformation("Found {PackagesCount} new packages at: {Time}", updatedPackages.Count, DateTime.Now.AddHours(-4));
-                _logger.LogInformation("New package's ID: {PackageIds}", string.Join(", ", updatedPackages.Select(x => x.Identifier).ToList()));
-            }
-            else
-                _logger.LogInformation("No new packages were found");
-
-            return updatedPackages;
-        }
-
-        private string ParseMessageFor(IEnumerable<Package> packages)
-        {
-            if (packages == null || !packages.Any())
-                return "⚠️ Lista de paquetes vacía ⚠️";
-
-            List<string> messages = new List<string>();
-            messages.Add($"*Estado de paquetes*");
-            if (packages.Count() > SIMPLE_PACKAGES_AMOUNT)
-                messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
-
-            messages.Add("");
-
-            foreach (var package in packages)
-            {
-                var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
-                messages.Add($"*Id*: {package.Identifier}");
-                messages.Add($"*Descripción*: {description}");
-                messages.Add($"*Tracking*: {package.TrackingInformation}");
-                messages.Add($"*Peso*: {package.Weight} libras");
-
-                var previousStatus = _previousPackages.ContainsKey(package.Identifier)
-                    ? _previousPackages[package.Identifier].Status
-                    : package.Status;
-                if (previousStatus != package.Status)
-                    messages.Add($"*Estado*: ~{previousStatus.Description}~ → {package.Status.Description}, _{package.Status.Percentage}_");
-                else
-                    messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_");
-                messages.Add("");
-            }
-
-            messages.RemoveAt(messages.Count - 1);
-            return string.Join('\n', messages);
         }
     }
 }
