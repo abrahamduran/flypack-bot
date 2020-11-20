@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "FlypackBot": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

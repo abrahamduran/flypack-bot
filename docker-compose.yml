@@ -1,0 +1,15 @@
+version: '3.4'
+
+services:
+  flypackbot:
+    image: ${DOCKER_REGISTRY-}flypackbot
+    build:
+      context: .
+      dockerfile: FlypackBot/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - Flypack__Username=${FLYPACK_USERNAME}
+      - Flypack__Password=${FLYPACK_PASSWORD}
+      - Telegram__AccessToken=${TELEGRAM_ACCESS_TOKEN}
+      - Telegram__AuthorizedUserIdentifier=${TELEGRAM_AUTHORIZED_USER_IDENTIFIER}
+      - Telegram__ChannelIdentifier=${TELEGRAM_CHANNEL_IDENTIFIER}
