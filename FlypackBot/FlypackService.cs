@@ -89,8 +89,10 @@ namespace FlypackBot
             return ParseMessageFor(packages);
         }
 
+        public List<Package> GetPackages() => _currentPackages;
         public string GetCurrentPackagesList() => ParseMessageFor(_currentPackages);
         public string GetPreviousPackagesList() => ParseMessageFor(_previousPackages.Values.ToList());
+
 
         // TODO: remove this command since it's only intended to be used for debugging purpose
         public string Reset()
@@ -169,7 +171,7 @@ namespace FlypackBot
                     ? _previousPackages[package.Identifier].Status
                     : package.Status;
                 if (previousStatus != package.Status)
-                    messages.Add($"*Estado*: {previousStatus.Description} → {package.Status.Description}, _{package.Status.Percentage}_");
+                    messages.Add($"*Estado*: ~{previousStatus.Description}~ → {package.Status.Description}, _{package.Status.Percentage}_");
                 else
                     messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_");
                 messages.Add("");

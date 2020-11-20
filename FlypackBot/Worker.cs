@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FlypackBot.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -85,13 +86,27 @@ namespace FlypackBot
         private async void OnInlineQuery(object sender, InlineQueryEventArgs e)
         {
             _logger.LogDebug("Received inline query from: {SenderId}", e.InlineQuery.From.Id);
-            
-        }
+            var query = e.InlineQuery.Query.ToLower();
+            var results = _service.GetPackages().Where(x => x.ContainsQuery(query)).Select(x =>
+            {
+                var content = new InputTextMessageContent(
+                    $"*Id*: {x.Identifier}\n" +
+                    $"*Descripción*: {x.Description}\n" +
+                    $"*Tracking*: {x.TrackingInformation}\n" +
+                    $"*Peso*: {x.Weight} libras\n" +
+                    $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
+                )
+                { ParseMode = ParseMode.Markdown };
 
-        private void OnInlineResultChosen(object sender, ChosenInlineResultEventArgs e)
-        {
-            Console.WriteLine($"Received inline result: {e.ChosenInlineResult.ResultId}");
+                return new InlineQueryResultArticle(x.Identifier, x.Description, content)
+                {
+                    Description = $"{x.Status}\n{x.Weight} libras"
+                };
+            }).ToList();
+
+            await _client.AnswerInlineQueryAsync(e.InlineQuery.Id, results, 60, true);
         }
+        #endregion
 
         private async Task AnswerChannelMessage(Message message)
         {
@@ -121,15 +136,12 @@ namespace FlypackBot
                 parseMode: ParseMode.Markdown
             );
         }
+    }
 
-        #endregion
-        //protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        //{
-        //    while (!stoppingToken.IsCancellationRequested)
-        //    {
-        //        _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
-        //        await Task.Delay(1000, stoppingToken);
-        //    }
-        //}
+    internal static class PackageExtension
+    {
+        internal static bool ContainsQuery(this Package package, string query)
+            => (package.Identifier + package.Description + package.Status)
+                .ToLower().Contains(query) || string.IsNullOrEmpty(query);
     }
 }

@@ -34,5 +34,7 @@ namespace FlypackBot.Models
         public override bool Equals(object obj)
             => obj is PackageStatus status &&
                    Description == status.Description && Percentage == status.Percentage;
+
+        public override string ToString() => $"{Description}, {Percentage}";
     }
 }
