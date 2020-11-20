@@ -86,6 +86,9 @@ namespace FlypackBot
         public async Task<string> RequestFreshPackagesListAsync()
         {
             var packages = await _flypack.GetPackagesAsync(_path);
+            if (packages == null || !packages.Any())
+                _logger.LogWarning("Failed to retrieve packages with path: {Path}", _path);
+
             return ParseMessageFor(packages);
         }
 
