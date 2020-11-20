@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using FlypackSettings = FlypackBot.Settings.Flypack;
+using TelegramSettings = FlypackBot.Settings.Telegram;
 
 namespace FlypackBot
 {
@@ -16,8 +18,12 @@ namespace FlypackBot
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
+                .ConfigureServices((ctx, services) =>
                 {
+                    services.Configure<TelegramSettings>(ctx.Configuration.GetSection("Telegram"));
+                    services.Configure<FlypackSettings>(ctx.Configuration.GetSection("Flypack"));
+                    services.AddScoped<FlypackService>();
+                    services.AddScoped<FlypackScrapper>();
                     services.AddHostedService<Worker>();
                 });
     }
