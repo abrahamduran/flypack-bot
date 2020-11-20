@@ -16,6 +16,7 @@ namespace FlypackBot
     public class FlypackService
     {
         private const int MAX_RETRIES = 3;
+        private const int SIMPLE_PACKAGES_AMOUNT = 3;
         private int _retriesCount = 0;
         private readonly ILogger<FlypackService> _logger;
         private readonly FlypackScrapper _flypack;
@@ -160,7 +161,11 @@ namespace FlypackBot
                 return "⚠️ Lista de paquetes vacía ⚠️";
 
             List<string> messages = new List<string>();
-            messages.Add("*Estado de paquetes*\n");
+            messages.Add($"*Estado de paquetes*");
+            if (packages.Count() > SIMPLE_PACKAGES_AMOUNT)
+                messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
+
+            messages.Add("");
 
             foreach (var package in packages)
             {
