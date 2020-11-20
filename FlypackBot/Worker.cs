@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
-using Telegram.Bot.Types.ReplyMarkups;
 using TelegramSettings = FlypackBot.Settings.Telegram;
 
 namespace FlypackBot
@@ -52,7 +50,7 @@ namespace FlypackBot
         #region Bot Event Handlers
         private async void OnMessage(object sender, MessageEventArgs e)
         {
-            if (e.Message.From.Id != _settings.AuthorizedUserIdentifier)
+            if (!_settings.AuthorizedUsers.Contains(e.Message.From.Id))
             {
                 _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}", e.Message.From.Id, e.Message.From.Username);
                 return;
