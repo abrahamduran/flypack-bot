@@ -145,7 +145,7 @@ namespace FlypackBot
                 messages.Add($"*Tracking*: {package.TrackingInformation}");
 
                 if (!isUpdate)
-                    messages.Add($"*Recibido*: {package.Delivered.ToShortDateString()}");
+                    messages.Add($"*Recibido*: {package.Delivered.ToString("MMM dd, yyyy")}");
 
                 messages.Add($"*Peso*: {package.Weight} libras");
 
