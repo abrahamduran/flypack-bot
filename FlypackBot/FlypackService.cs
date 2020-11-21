@@ -61,7 +61,7 @@ namespace FlypackBot
 
                 if (packages.Any())
                 {
-                    var message = ParseMessageFor(packages);
+                    var message = ParseMessageFor(packages, true);
                     await client.SendTextMessageAsync(
                       chatId: channelIdentifier,
                       text: message,
