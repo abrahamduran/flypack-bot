@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FlypackBot.Models;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 using ScrapySharp.Extensions;
 using ScrapySharp.Network;
 
@@ -14,10 +15,19 @@ namespace FlypackBot
     public class FlypackScrapper
     {
         private const string BASE_URL = "https://www.flypack.com.do";
-        private readonly ScrapingBrowser _browser = new ScrapingBrowser();
+        private const string SESSION_EXPIRED_MESSAGE = "Session expirada, ingrese nuevamente al sistema";
+        private readonly ILogger<FlypackScrapper> _logger;
+        private readonly ScrapingBrowser _browser;
+
+        public FlypackScrapper(ILogger<FlypackScrapper> logger)
+        {
+            _logger = logger;
+            _browser = new ScrapingBrowser();
+        }
 
         public async Task<string> LoginAsync(string username, string password)
         {
+            _logger.LogInformation("Login into Flypack with account: {Account}", username);
             var data = new[] {
                 new Field() { Name = "EJECUTE", Value = "1" },
                 new Field() { Name = "contactForm", Value = "" },
@@ -32,10 +42,18 @@ namespace FlypackBot
 
         public async Task<IEnumerable<Package>> GetPackagesAsync(string path)
         {
+            _logger.LogInformation("Get packages list from Flypack");
             var html = await GetHtmlAsync($"{BASE_URL}/{path}", HttpVerb.Get, null, null);
             var rows = html.CssSelect("tbody > tr");
 
-            if (!rows.Any()) return null;
+            if (!rows.Any())
+            {
+                _logger.LogWarning("Response structure seems to differ from the expected. Unable to find packages for path: {Path}", path);
+                if (html.InnerText.Contains(SESSION_EXPIRED_MESSAGE))
+                    _logger.LogError("Logged session has expired");
+
+                return null;
+            }
 
             var packages = new List<Package>();
             foreach (var row in rows)

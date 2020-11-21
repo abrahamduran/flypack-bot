@@ -116,7 +116,7 @@ namespace FlypackBot
 
             if (updatedPackages.Any())
             {
-                _logger.LogInformation("Found {PackagesCount} new packages at: {Time}", updatedPackages.Count, DateTime.Now.AddHours(-4));
+                _logger.LogInformation("Found {PackagesCount} new packages at: {Time}", updatedPackages.Count, DateTime.Now);
                 _logger.LogInformation("New package's ID: {PackageIds}", string.Join(", ", updatedPackages.Select(x => x.Identifier).ToList()));
             }
             else
@@ -165,7 +165,7 @@ namespace FlypackBot
 
         private async void LogFailedLogin(TelegramBotClient client, long channelIdentifier)
         {
-            _logger.LogWarning("Packages path is empty for account: {Account}", _settings.Username);
+            _logger.LogWarning("Failed login for account: {Account}, at: {Time}", _settings.Username, DateTime.Now);
             await client.SendTextMessageAsync(
               chatId: channelIdentifier,
               text: $"⚠️ Packages path is empty ⚠️",
@@ -175,7 +175,7 @@ namespace FlypackBot
 
         private async void LogFailedListPackages(TelegramBotClient client, long channelIdentifier, string path)
         {
-            _logger.LogWarning("Failed to retrieve packages with path: {Path}", path);
+            _logger.LogWarning("Failed to retrieve packages with path: {Path}, at: {Time}", path, DateTime.Now);
             await client.SendTextMessageAsync(
               chatId: channelIdentifier,
               text: $"⚠️ Failed to retrieve packages ⚠️",
@@ -185,7 +185,7 @@ namespace FlypackBot
 
         private async void LogMaxLoginAttemptsReached(TelegramBotClient client, long channelIdentifier, string path)
         {
-            _logger.LogWarning("Too many failed login attemps for path: {Path}", path);
+            _logger.LogWarning("Too many failed login attemps for path: {Path}, at: {Time}", path, DateTime.Now);
             await client.SendTextMessageAsync(
               chatId: channelIdentifier,
               text: $"⚠️ Too many failed login attemps ⚠️\nCheck logs for more details.",
