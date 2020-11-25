@@ -105,7 +105,7 @@ namespace FlypackBot
             _previousPackages = new Dictionary<string, Package>();
             _retriesCount = 0;
             _path = "";
-            return "";
+            return "Los datos han sido reiniciados ✅";
         }
 
         private List<Package> FilterPackages(IEnumerable<Package> packages)

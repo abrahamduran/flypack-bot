@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -117,7 +118,8 @@ namespace FlypackBot
 
         private async Task AnswerBotCommand(Message message)
         {
-            Task<string> action = (message.Text.Split(' ').First()) switch
+            var command = message.Text.Split(' ').First();
+            Task<string> action = command switch
             {
                 "/packages" => _service.LoginAndRequestFreshPackagesListAsync(),
                 "/packages@flypackbot" => _service.LoginAndRequestFreshPackagesListAsync(),
@@ -128,7 +130,12 @@ namespace FlypackBot
                 _ => Task.FromResult("Hasta yo quiero saber")
             };
             var stringMessage = await action;
-            
+            if (string.IsNullOrEmpty(stringMessage))
+            {
+                stringMessage = $"⚠️ El comando {command} no produjo resultados ⚠️";
+                _logger.LogWarning("The command {Command} produced no results at {Time}", command, DateTime.Now);
+            }
+
             await _client.SendTextMessageAsync(
                 chatId: message.Chat,
                 text: stringMessage,
