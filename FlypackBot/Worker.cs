@@ -84,6 +84,12 @@ namespace FlypackBot
 
         private async void OnInlineQuery(object sender, InlineQueryEventArgs e)
         {
+            if (!_settings.AuthorizedUsers.Contains(e.InlineQuery.From.Id))
+            {
+                _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}", e.InlineQuery.From.Id, e.InlineQuery.From.Username);
+                return;
+            }
+
             _logger.LogDebug("Received inline query from: {SenderId}", e.InlineQuery.From.Id);
             var query = e.InlineQuery.Query.ToLower();
             var results = _service.GetPackages().Where(x => x.ContainsQuery(query)).Select(x =>
@@ -129,6 +135,7 @@ namespace FlypackBot
                 "/reset" => Task.FromResult(_service.Reset()),
                 _ => Task.FromResult("Hasta yo quiero saber")
             };
+
             var stringMessage = await action;
             if (string.IsNullOrEmpty(stringMessage))
             {
