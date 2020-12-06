@@ -42,7 +42,7 @@ namespace FlypackBot
 
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogDebug("Fetch running at: {time}", DateTime.Now);
+                _logger.LogDebug("Executing fetch");
                 var packages = await _flypack.GetPackagesAsync(_path);
                 if (packages == null && _retriesCount < MAX_RETRIES)
                 {
@@ -116,7 +116,7 @@ namespace FlypackBot
 
             if (updatedPackages.Any())
             {
-                _logger.LogInformation("Found {PackagesCount} new packages at: {Time}", updatedPackages.Count, DateTime.Now);
+                _logger.LogInformation("Found {PackagesCount} new packages", updatedPackages.Count);
                 _logger.LogInformation("New package's ID: {PackageIds}", string.Join(", ", updatedPackages.Select(x => x.Identifier).ToList()));
             }
             else
@@ -165,7 +165,7 @@ namespace FlypackBot
 
         private async void LogFailedLogin(TelegramBotClient client, long channelIdentifier)
         {
-            _logger.LogWarning("Failed login for account: {Account}, at: {Time}", _settings.Username, DateTime.Now);
+            _logger.LogWarning("Failed login for account: {Account}", _settings.Username);
             await client.SendTextMessageAsync(
               chatId: channelIdentifier,
               text: $"⚠️ Packages path is empty ⚠️",
@@ -175,7 +175,7 @@ namespace FlypackBot
 
         private async void LogFailedListPackages(TelegramBotClient client, long channelIdentifier, string path)
         {
-            _logger.LogWarning("Failed to retrieve packages with path: {Path}, at: {Time}", path, DateTime.Now);
+            _logger.LogWarning("Failed to retrieve packages with path: {Path}", path);
             await client.SendTextMessageAsync(
               chatId: channelIdentifier,
               text: $"⚠️ Failed to retrieve packages ⚠️",
@@ -185,7 +185,7 @@ namespace FlypackBot
 
         private async void LogMaxLoginAttemptsReached(TelegramBotClient client, long channelIdentifier, string path)
         {
-            _logger.LogWarning("Too many failed login attemps for path: {Path}, at: {Time}", path, DateTime.Now);
+            _logger.LogWarning("Too many failed login attemps for path: {Path}", path);
             await client.SendTextMessageAsync(
               chatId: channelIdentifier,
               text: $"⚠️ Too many failed login attemps ⚠️\nCheck logs for more details.",

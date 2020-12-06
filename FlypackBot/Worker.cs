@@ -140,7 +140,7 @@ namespace FlypackBot
             if (string.IsNullOrEmpty(stringMessage))
             {
                 stringMessage = $"⚠️ El comando {command} no produjo resultados ⚠️";
-                _logger.LogWarning("The command {Command} produced no results at {Time}", command, DateTime.Now);
+                _logger.LogWarning("The command {Command} produced no results", command);
             }
 
             await _client.SendTextMessageAsync(
