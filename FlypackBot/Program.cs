@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using FlypackSettings = FlypackBot.Settings.Flypack;
 using TelegramSettings = FlypackBot.Settings.Telegram;
 
@@ -18,6 +19,7 @@ namespace FlypackBot
                 .ConfigureLogging(builder =>
                     builder.AddSimpleConsole(options =>
                     {
+                        options.ColorBehavior = LoggerColorBehavior.Enabled;
                         options.TimestampFormat = "[yyyy-MM-dd HH:mm] ";
                     })
                 )
