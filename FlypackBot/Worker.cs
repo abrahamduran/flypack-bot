@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -171,9 +172,29 @@ namespace FlypackBot
                 _logger.LogWarning("The command {Command} produced no results", command);
             }
 
-            await _client.SendTextMessageAsync(
-                chatId: message.Chat,
-                text: stringMessage,
+            var messages = SplitMessage(stringMessage);
+
+            foreach (var msg in messages)
+            {
+                await _client.SendTextMessageAsync(
+                    chatId: message.Chat,
+                    text: msg,
+                    parseMode: ParseMode.Markdown
+                );
+            }
+        }
+
+        private IEnumerable<string> SplitMessage(string message)
+        {
+            if (message.Length > _settings.MaxMessageLength)
+            {
+                var breaklineIndex = message.Substring(0, _settings.MaxMessageLength).LastIndexOf("\n\n");
+                var trimmedMessage = message.Substring(0, breaklineIndex);
+                return new[] { trimmedMessage }.Concat(SplitMessage(message.Substring(breaklineIndex + 2)));
+            }
+            return new[] { message };
+        }
+
         private async Task HandleExceptionAsync(Exception exception)
         {
             _logger.LogError(exception, exception.Message);

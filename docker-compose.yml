@@ -14,3 +14,4 @@ services:
       - Telegram__AccessToken=${TELEGRAM_ACCESS_TOKEN}
       - Telegram__AuthorizedUsers__0=${TELEGRAM_AUTHORIZED_USERS_0}
       - Telegram__ChannelIdentifier=${TELEGRAM_CHANNEL_IDENTIFIER}
+      - Telegram__MaxMessageLength=${TELEGRAM_MAXIMUM_MESSAGE_LENGTH}

@@ -6,5 +6,6 @@ namespace FlypackBot.Settings
         public string AccessToken { get; set; }
         public int[] AuthorizedUsers { get; set; }
         public long ChannelIdentifier { get; set; }
+        public int MaxMessageLength { get; set; }
     }
 }
