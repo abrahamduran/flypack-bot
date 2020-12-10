@@ -36,7 +36,14 @@ namespace FlypackBot
             _client.OnUpdate += OnUpdate;
             _client.OnInlineQuery += OnInlineQuery;
             _client.StartReceiving(cancellationToken: stoppingToken);
-            await _service.SubscribeAsync(_client, _settings.ChannelIdentifier, stoppingToken);
+            try
+            {
+                await _service.SubscribeAsync(_client, _settings.ChannelIdentifier, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(ex);
+            }
 
             //return Task.CompletedTask;
         }
@@ -59,7 +66,14 @@ namespace FlypackBot
 
             if (e.Message.Text?.StartsWith('/') == true)
             {
-                await AnswerBotCommand(e.Message);
+                try
+                {
+                    await AnswerBotCommand(e.Message);
+                }
+                catch (Exception ex)
+                {
+                    await HandleExceptionAsync(ex);
+                }
             }
             else if (e.Message.Text != null)
             {
@@ -74,11 +88,18 @@ namespace FlypackBot
 
         private async void OnUpdate(object sender, UpdateEventArgs e)
         {
-            switch (e.Update.Type)
+            try
             {
-                case UpdateType.ChannelPost:
-                    await AnswerChannelMessage(e.Update.ChannelPost);
-                    break;
+                switch (e.Update.Type)
+                {
+                    case UpdateType.ChannelPost:
+                        await AnswerChannelMessage(e.Update.ChannelPost);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(ex);
             }
         }
 
@@ -91,26 +112,33 @@ namespace FlypackBot
             }
 
             _logger.LogDebug("Received inline query from: {SenderId}", e.InlineQuery.From.Id);
-            var query = e.InlineQuery.Query.ToLower();
-            var results = _service.GetPackages().Where(x => x.ContainsQuery(query)).Select(x =>
+            try
             {
-                var content = new InputTextMessageContent(
-                    $"*Id*: {x.Identifier}\n" +
-                    $"*Descripción*: {x.Description}\n" +
-                    $"*Tracking*: {x.TrackingInformation}\n" +
-                    $"*Recibido*: {x.Delivered.ToString("MMM dd, yyyy")}\n" +
-                    $"*Peso*: {x.Weight} libras\n" +
-                    $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
-                )
-                { ParseMode = ParseMode.Markdown };
-
-                return new InlineQueryResultArticle(x.Identifier, x.Description, content)
+                var query = e.InlineQuery.Query.ToLower();
+                var results = _service.GetPackages().Where(x => x.ContainsQuery(query)).Select(x =>
                 {
-                    Description = $"{x.Status}\n{x.Weight} libras"
-                };
-            }).ToList();
+                    var content = new InputTextMessageContent(
+                        $"*Id*: {x.Identifier}\n" +
+                        $"*Descripción*: {x.Description}\n" +
+                        $"*Tracking*: {x.TrackingInformation}\n" +
+                        $"*Recibido*: {x.Delivered.ToString("MMM dd, yyyy")}\n" +
+                        $"*Peso*: {x.Weight} libras\n" +
+                        $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
+                    )
+                    { ParseMode = ParseMode.Markdown };
 
-            await _client.AnswerInlineQueryAsync(e.InlineQuery.Id, results, 60, true);
+                    return new InlineQueryResultArticle(x.Identifier, x.Description, content)
+                    {
+                        Description = $"{x.Status}\n{x.Weight} libras"
+                    };
+                }).ToList();
+
+                await _client.AnswerInlineQueryAsync(e.InlineQuery.Id, results, 60, true);
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(ex);
+            }
         }
         #endregion
 
@@ -146,6 +174,12 @@ namespace FlypackBot
             await _client.SendTextMessageAsync(
                 chatId: message.Chat,
                 text: stringMessage,
+        private async Task HandleExceptionAsync(Exception exception)
+        {
+            _logger.LogError(exception, exception.Message);
+            await _client.SendTextMessageAsync(
+                chatId: _settings.ChannelIdentifier,
+                text: "Ha ocurrido un error 🧨",
                 parseMode: ParseMode.Markdown
             );
         }
