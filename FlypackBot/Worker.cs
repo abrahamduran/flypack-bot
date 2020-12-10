@@ -33,9 +33,9 @@ namespace FlypackBot
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            _client.OnInlineQuery += OnInlineQuery;
             _client.OnMessage += OnMessage;
             _client.OnUpdate += OnUpdate;
-            _client.OnInlineQuery += OnInlineQuery;
             _client.StartReceiving(cancellationToken: stoppingToken);
             try
             {
@@ -153,6 +153,8 @@ namespace FlypackBot
 
         private async Task AnswerBotCommand(Message message)
         {
+            await _client.SendChatActionAsync(message.Chat, ChatAction.Typing);
+
             var command = message.Text.Split(' ').First();
             Task<string> action = command switch
             {
