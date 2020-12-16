@@ -41,6 +41,11 @@ namespace FlypackBot
             {
                 await _service.SubscribeAsync(_client, _settings.ChannelIdentifier, stoppingToken);
             }
+            catch (TaskCanceledException ex)
+            {
+                _logger.LogWarning("Task has been cancelled. Message: {Message}", ex.Message);
+                return;
+            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(ex);
@@ -211,7 +216,7 @@ namespace FlypackBot
     internal static class PackageExtension
     {
         internal static bool ContainsQuery(this Package package, string query)
-            => (package.Identifier + package.Description + package.Status)
+            => (package.Identifier + package.Description + package.Status + package.TrackingInformation)
                 .ToLower().Contains(query) || string.IsNullOrEmpty(query);
     }
 }
