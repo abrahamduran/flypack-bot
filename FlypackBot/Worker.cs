@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace FlypackBot
 {
     public class Worker : BackgroundService
     {
+        private const int SIMPLE_PACKAGES_AMOUNT = 3;
+
         private readonly ILogger<Worker> _logger;
         private readonly FlypackService _service;
         private readonly TelegramSettings _settings;
@@ -33,13 +36,17 @@ namespace FlypackBot
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _client.OnInlineQuery += OnInlineQuery;
-            _client.OnMessage += OnMessage;
-            _client.OnUpdate += OnUpdate;
-            _client.StartReceiving(cancellationToken: stoppingToken);
+            _client.OnUpdate += OnBotUpdate;
+            _client.OnMessage += OnBotMessage;
+            _client.OnInlineQuery += OnBotInlineQuery;
+
+            _service.OnUpdate += OnFlypackUpdate;
+            _service.OnFailedLogin += OnFlypackFailedLogin;
+            _service.OnFailedFetch += OnFlypackFailedFetch;
             try
             {
-                await _service.SubscribeAsync(_client, _settings.ChannelIdentifier, stoppingToken);
+                _client.StartReceiving(cancellationToken: stoppingToken);
+                await _service.SubscribeAsync(stoppingToken);
             }
             catch (TaskCanceledException ex)
             {
@@ -61,8 +68,8 @@ namespace FlypackBot
             return base.StopAsync(cancellationToken);
         }
 
-        #region Bot Event Handlers
-        private async void OnMessage(object sender, MessageEventArgs e)
+        #region Telegram Event Handlers
+        private async void OnBotMessage(object sender, MessageEventArgs e)
         {
             if (!_settings.AuthorizedUsers.Contains(e.Message.From.Id))
             {
@@ -92,7 +99,7 @@ namespace FlypackBot
             }
         }
 
-        private async void OnUpdate(object sender, UpdateEventArgs e)
+        private async void OnBotUpdate(object sender, UpdateEventArgs e)
         {
             try
             {
@@ -109,7 +116,7 @@ namespace FlypackBot
             }
         }
 
-        private async void OnInlineQuery(object sender, InlineQueryEventArgs e)
+        private async void OnBotInlineQuery(object sender, InlineQueryEventArgs e)
         {
             if (!_settings.AuthorizedUsers.Contains(e.InlineQuery.From.Id))
             {
@@ -126,7 +133,7 @@ namespace FlypackBot
                     var content = new InputTextMessageContent(
                         $"*Id*: {x.Identifier}\n" +
                         $"*Descripción*: {x.Description}\n" +
-                        $"*Tracking*: {x.TrackingInformation}\n" +
+                        $"*Tracking*: {x.Tracking}\n" +
                         $"*Recibido*: {x.Delivered.ToString("MMM dd, yyyy")}\n" +
                         $"*Peso*: {x.Weight} libras\n" +
                         $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
@@ -148,6 +155,20 @@ namespace FlypackBot
         }
         #endregion
 
+        #region Flypack Event Handlers
+        private async void OnFlypackUpdate(object sender, PackagesEventArgs e)
+        {
+            var message = ParseMessageFor(e.Packages, e.PreviousPackages, true);
+            await SendMessageToChat(message, _settings.ChannelIdentifier);
+        }
+
+        private async void OnFlypackFailedLogin(object sender, EventArgs e)
+            => await SendMessageToChat("⚠️ Hubo un error al iniciar sesión ⚠️", _settings.ChannelIdentifier);
+
+        private async void OnFlypackFailedFetch(object sender, EventArgs e)
+            => await SendMessageToChat("⚠️ Ocurrió un error al intentar recuperar la lista de paquetes ⚠️", _settings.ChannelIdentifier);
+        #endregion
+
         private async Task AnswerChannelMessage(Message message)
         {
             _logger.LogDebug("Received a text message in channel {ChatId}", message.Chat.Id);
@@ -161,30 +182,41 @@ namespace FlypackBot
             await _client.SendChatActionAsync(message.Chat, ChatAction.Typing);
 
             var command = message.Text.Split(' ').First();
-            Task<string> action = command switch
+
+            string stringMessage = command switch
             {
-                "/packages" => _service.LoginAndRequestFreshPackagesListAsync(),
-                "/packages@flypackbot" => _service.LoginAndRequestFreshPackagesListAsync(),
-                "/packages2" => _service.RequestFreshPackagesListAsync(),
-                "/current" => Task.FromResult(_service.GetCurrentPackagesList()),
-                "/previous" => Task.FromResult(_service.GetPreviousPackagesList()),
-                "/reset" => Task.FromResult(_service.Reset()),
-                _ => Task.FromResult("Hasta yo quiero saber")
+                "/packages" => ParseMessageFor(await _service.LoginAndFetchPackagesAsync(), null, false),
+                "/packages@flypackbot" => ParseMessageFor(await _service.LoginAndFetchPackagesAsync(), null, false),
+                "/packages2" => ParseMessageFor(await _service.FetchPackagesAsync(), null, false),
+                "/current" => ParseMessageFor(_service.GetCurrentPackages(), null, false),
+                "/previous" => ParseMessageFor(_service.GetPreviousPackages(), null, false),
+                "/reset" => _service.Reset(),
+                _ => "Hasta yo quiero saber"
             };
 
-            var stringMessage = await action;
             if (string.IsNullOrEmpty(stringMessage))
             {
                 stringMessage = $"⚠️ El comando {command} no produjo resultados ⚠️";
                 _logger.LogWarning("The command {Command} produced no results", command);
             }
 
-            var messages = SplitMessage(stringMessage);
+            await SendMessageToChat(stringMessage, message.Chat);
+        }
+
+        private async Task HandleExceptionAsync(Exception exception)
+        {
+            _logger.LogError(exception, exception.Message);
+            await SendMessageToChat("🧨 Ha ocurrido un error 🧨", _settings.ChannelIdentifier);
+        }
+
+        private async Task SendMessageToChat(string message, ChatId chatId)
+        {
+            var messages = SplitMessage(message);
 
             foreach (var msg in messages)
             {
                 await _client.SendTextMessageAsync(
-                    chatId: message.Chat,
+                    chatId: chatId,
                     text: msg,
                     parseMode: ParseMode.Markdown
                 );
@@ -202,21 +234,53 @@ namespace FlypackBot
             return new[] { message };
         }
 
-        private async Task HandleExceptionAsync(Exception exception)
+        private string ParseMessageFor(IEnumerable<Package> packages, Dictionary<string, Package> previousPackages, bool isUpdate)
         {
-            _logger.LogError(exception, exception.Message);
-            await _client.SendTextMessageAsync(
-                chatId: _settings.ChannelIdentifier,
-                text: "Ha ocurrido un error 🧨",
-                parseMode: ParseMode.Markdown
-            );
+            if (packages == null || !packages.Any())
+                return "⚠️ Lista de paquetes vacía ⚠️";
+
+            List<string> messages = new List<string>();
+            messages.Add($"*Estado de paquetes*");
+            if (packages.Count() > SIMPLE_PACKAGES_AMOUNT && !isUpdate)
+                messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
+
+            messages.Add("");
+
+            foreach (var package in packages)
+            {
+                var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
+                messages.Add($"*Id*: {package.Identifier}");
+                messages.Add($"*Descripción*: {description}");
+                messages.Add($"*Tracking*: {package.Tracking}");
+
+                if (!isUpdate)
+                    messages.Add($"*Recibido*: {package.Delivered.ToString("MMM dd, yyyy")}");
+
+
+                if (previousPackages != null && previousPackages.ContainsKey(package.Identifier) && previousPackages[package.Identifier] != package)
+                {
+                    var previous = previousPackages[package.Identifier];
+                    messages.Add($"*Peso*: {previous.Weight} → {package.Weight}");
+                    messages.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_");
+                }
+                else
+                {
+                    messages.Add($"*Peso*: {package.Weight} libras");
+                    messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_");
+                }
+
+                messages.Add("");
+            }
+
+            messages.RemoveAt(messages.Count - 1);
+            return string.Join('\n', messages);
         }
     }
 
     internal static class PackageExtension
     {
         internal static bool ContainsQuery(this Package package, string query)
-            => (package.Identifier + package.Description + package.Status + package.TrackingInformation)
+            => (package.Identifier + package.Description + package.Status + package.Tracking)
                 .ToLower().Contains(query) || string.IsNullOrEmpty(query);
     }
 }

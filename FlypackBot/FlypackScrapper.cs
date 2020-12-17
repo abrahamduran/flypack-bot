@@ -70,7 +70,7 @@ namespace FlypackBot
                 packages.Add(new Package
                 {
                     Identifier = info[0],
-                    TrackingInformation = info[1],
+                    Tracking = info[1],
                     Description = description,
                     Delivered = deliveredDate,
                     Weight = weight,

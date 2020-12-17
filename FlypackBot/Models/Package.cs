@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace FlypackBot.Models
 {
-    public struct Package
+    public struct Package : IEquatable<Package>
     {
         public string Identifier { get; set; }
-        public string TrackingInformation { get; set; }
+        public string Tracking { get; set; }
         public string Description { get; set; }
         public float Weight { get; set; }
         public PackageStatus Status { get; set; }
@@ -13,8 +14,22 @@ namespace FlypackBot.Models
         public DateTime Delivered { get; set; }
         public DateTime LastUpdated { get; set; }
 
+        public static bool operator ==(Package left, Package right)
+            => left.Equals(right);
+        public static bool operator !=(Package left, Package right)
+            => !(left == right);
+
+        public bool Equals([AllowNull] Package other) =>
+            Delivered == other.Delivered &&
+            Description == other.Description &&
+            Identifier == other.Identifier &&
+            LastUpdated == other.LastUpdated &&
+            Status == other.Status &&
+            Tracking == other.Tracking &&
+            Weight == other.Weight;
+
         public override int GetHashCode() =>
-            TrackingInformation.GetHashCode() ^
+            Tracking.GetHashCode() ^
             Description.GetHashCode() ^
             Delivered.GetHashCode() ^
             Weight.GetHashCode() ^

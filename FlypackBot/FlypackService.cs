@@ -16,15 +16,17 @@ namespace FlypackBot
     public class FlypackService
     {
         private const int MAX_RETRIES = 3;
-        private const int SIMPLE_PACKAGES_AMOUNT = 3;
+        private string _path;
         private int _retriesCount = 0;
         private readonly ILogger<FlypackService> _logger;
         private readonly FlypackScrapper _flypack;
         private readonly FlypackSettings _settings;
         private List<Package> _currentPackages = new List<Package>();
         private Dictionary<string, Package> _previousPackages = new Dictionary<string, Package>();
-
-        private string _path;
+        
+        public event EventHandler<PackagesEventArgs> OnUpdate;
+        public event EventHandler OnFailedLogin;
+        public event EventHandler OnFailedFetch;
 
         public FlypackService(ILogger<FlypackService> logger, FlypackScrapper flypack, IOptions<FlypackSettings> options)
         {
@@ -33,12 +35,12 @@ namespace FlypackBot
             _settings = options.Value;
         }
 
-        public async Task SubscribeAsync(TelegramBotClient client, long channelIdentifier, CancellationToken cancellationToken)
+        public async Task SubscribeAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Login into Flypack with account: {account}", _settings.Username);
             _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
 
-            if (string.IsNullOrEmpty(_path)) { LogFailedLogin(client, channelIdentifier); return; }
+            if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return; }
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -46,13 +48,13 @@ namespace FlypackBot
                 var packages = await _flypack.GetPackagesAsync(_path);
                 if (packages == null && _retriesCount < MAX_RETRIES)
                 {
-                    LogFailedListPackages(client, channelIdentifier, _path);
+                    LogFailedListPackages(_path);
                     _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
                     _retriesCount++; continue;
                 }
                 else if (_retriesCount >= MAX_RETRIES)
                 {
-                    LogMaxLoginAttemptsReached(client, channelIdentifier, _path);
+                    LogMaxLoginAttemptsReached(_path);
                     break;
                 }
                 else _retriesCount = 0;
@@ -60,14 +62,8 @@ namespace FlypackBot
                 packages = FilterPackages(packages);
 
                 if (packages.Any())
-                {
-                    var message = ParseMessageFor(packages, true);
-                    await client.SendTextMessageAsync(
-                      chatId: channelIdentifier,
-                      text: message,
-                      parseMode: ParseMode.Markdown
-                    );
-                }
+                    OnUpdate?.Invoke(this, new PackagesEventArgs(packages, _previousPackages));
+
                 await Task.Delay(TimeSpan.FromMinutes(_settings.FetchInterval), cancellationToken);
             }
 
@@ -76,27 +72,26 @@ namespace FlypackBot
 
         public void StopAsync() => _logger.LogInformation("Stopping FlypackService");
 
-        public async Task<string> LoginAndRequestFreshPackagesListAsync()
+        public async Task<IEnumerable<Package>> LoginAndFetchPackagesAsync()
         {
             var path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
             var packages = await _flypack.GetPackagesAsync(path);
-            return ParseMessageFor(packages, false);
+            return packages;
         }
 
         // TODO: remove this command since it's only intended to be used for debugging purpose
-        public async Task<string> RequestFreshPackagesListAsync()
+        public async Task<IEnumerable<Package>> FetchPackagesAsync()
         {
             var packages = await _flypack.GetPackagesAsync(_path);
             if (packages == null || !packages.Any())
                 _logger.LogWarning("Failed to retrieve packages with path: {Path}", _path);
 
-            return ParseMessageFor(packages, false);
+            return packages;
         }
 
-        public List<Package> GetPackages() => _currentPackages;
-        public string GetCurrentPackagesList() => ParseMessageFor(_currentPackages, false);
-        public string GetPreviousPackagesList() => ParseMessageFor(_previousPackages.Values.ToList(), false);
-
+        public IEnumerable<Package> GetPackages() => _currentPackages;
+        public IEnumerable<Package> GetCurrentPackages() => _currentPackages;
+        public IEnumerable<Package> GetPreviousPackages() => _previousPackages.Values.ToList();
 
         // TODO: remove this command since it's only intended to be used for debugging purpose
         public string Reset()
@@ -125,72 +120,22 @@ namespace FlypackBot
             return updatedPackages;
         }
 
-        private string ParseMessageFor(IEnumerable<Package> packages, bool isUpdate)
-        {
-            if (packages == null || !packages.Any())
-                return "⚠️ Lista de paquetes vacía ⚠️";
-
-            List<string> messages = new List<string>();
-            messages.Add($"*Estado de paquetes*");
-            if (packages.Count() > SIMPLE_PACKAGES_AMOUNT && !isUpdate)
-                messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
-
-            messages.Add("");
-
-            foreach (var package in packages)
-            {
-                var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
-                messages.Add($"*Id*: {package.Identifier}");
-                messages.Add($"*Descripción*: {description}");
-                messages.Add($"*Tracking*: {package.TrackingInformation}");
-
-                if (!isUpdate)
-                    messages.Add($"*Recibido*: {package.Delivered.ToString("MMM dd, yyyy")}");
-
-                messages.Add($"*Peso*: {package.Weight} libras");
-
-                var previousStatus = _previousPackages.ContainsKey(package.Identifier)
-                    ? _previousPackages[package.Identifier].Status
-                    : package.Status;
-                if (previousStatus != package.Status)
-                    messages.Add($"*Estado*: {previousStatus.Description} → {package.Status.Description}, _{package.Status.Percentage}_");
-                else
-                    messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_");
-                messages.Add("");
-            }
-
-            messages.RemoveAt(messages.Count - 1);
-            return string.Join('\n', messages);
-        }
-
-        private async void LogFailedLogin(TelegramBotClient client, long channelIdentifier)
+        private void LogFailedLogin()
         {
             _logger.LogWarning("Failed login for account: {Account}", _settings.Username);
-            await client.SendTextMessageAsync(
-              chatId: channelIdentifier,
-              text: $"⚠️ Packages path is empty ⚠️",
-              parseMode: ParseMode.Markdown
-            );
+            OnFailedLogin?.Invoke(this, EventArgs.Empty);
         }
-
-        private async void LogFailedListPackages(TelegramBotClient client, long channelIdentifier, string path)
+        
+        private void LogFailedListPackages(string path)
         {
             _logger.LogWarning("Failed to retrieve packages with path: {Path}", path);
-            await client.SendTextMessageAsync(
-              chatId: channelIdentifier,
-              text: $"⚠️ Failed to retrieve packages ⚠️",
-              parseMode: ParseMode.Markdown
-            );
+            OnFailedFetch?.Invoke(this, EventArgs.Empty);
         }
 
-        private async void LogMaxLoginAttemptsReached(TelegramBotClient client, long channelIdentifier, string path)
+        private void LogMaxLoginAttemptsReached(string path)
         {
             _logger.LogWarning("Too many failed login attemps for path: {Path}", path);
-            await client.SendTextMessageAsync(
-              chatId: channelIdentifier,
-              text: $"⚠️ Too many failed login attemps ⚠️\nCheck logs for more details.",
-              parseMode: ParseMode.Markdown
-            );
+            OnFailedLogin?.Invoke(this, EventArgs.Empty);
         }
     }
 }
