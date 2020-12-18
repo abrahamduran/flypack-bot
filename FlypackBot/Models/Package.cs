@@ -34,6 +34,9 @@ namespace FlypackBot.Models
             Delivered.GetHashCode() ^
             Weight.GetHashCode() ^
             Status.GetHashCode();
+
+        public override bool Equals(object obj)
+            => obj is PackageStatus status && Equals(status);
     }
 
     public struct PackageStatus

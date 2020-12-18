@@ -254,20 +254,20 @@ namespace FlypackBot
                 messages.Add($"*Tracking*: {package.Tracking}");
 
                 if (!isUpdate)
-                    messages.Add($"*Recibido*: {package.Delivered.ToString("MMM dd, yyyy")}");
+                    messages.Add($"*Recibido*: {package.Delivered:MMM dd, yyyy}");
 
+                var previous = previousPackages != null && previousPackages.ContainsKey(package.Identifier)
+                    ? previousPackages[package.Identifier] : package;
 
-                if (previousPackages != null && previousPackages.ContainsKey(package.Identifier) && previousPackages[package.Identifier] != package)
-                {
-                    var previous = previousPackages[package.Identifier];
-                    messages.Add($"*Peso*: {previous.Weight} → {package.Weight}");
-                    messages.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_");
-                }
+                if (previous.Weight != package.Weight)
+                    messages.Add($"*Peso*: {previous.Weight} → {package.Weight} libras");
                 else
-                {
                     messages.Add($"*Peso*: {package.Weight} libras");
+
+                if (previous.Status != package.Status)
+                    messages.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_");
+                else
                     messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_");
-                }
 
                 messages.Add("");
             }
