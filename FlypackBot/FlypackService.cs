@@ -70,7 +70,13 @@ namespace FlypackBot
             _logger.LogInformation("Cancellation requested");
         }
 
-        public void StopAsync() => _logger.LogInformation("Stopping FlypackService");
+        public void StopAsync()
+        {
+            _logger.LogInformation("Stopping FlypackService");
+            OnFailedFetch = null;
+            OnFailedLogin = null;
+            OnUpdate = null;
+        }
 
         public async Task<IEnumerable<Package>> LoginAndFetchPackagesAsync()
         {

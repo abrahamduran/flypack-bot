@@ -48,11 +48,6 @@ namespace FlypackBot
                 _client.StartReceiving(cancellationToken: stoppingToken);
                 await _service.SubscribeAsync(stoppingToken);
             }
-            catch (TaskCanceledException ex)
-            {
-                _logger.LogWarning("Task has been cancelled. Message: {Message}", ex.Message);
-                return;
-            }
             catch (Exception ex)
             {
                 await HandleExceptionAsync(ex);
@@ -63,8 +58,8 @@ namespace FlypackBot
 
         public override Task StopAsync(CancellationToken cancellationToken)
         {
+            _service.StopAsync();
             _client.StopReceiving();
-            //_flypackService.StopAsync();
             return base.StopAsync(cancellationToken);
         }
 
@@ -205,8 +200,13 @@ namespace FlypackBot
 
         private async Task HandleExceptionAsync(Exception exception)
         {
-            _logger.LogError(exception, exception.Message);
-            await SendMessageToChat("🧨 Ha ocurrido un error 🧨", _settings.ChannelIdentifier);
+            if (exception is TaskCanceledException)
+                _logger.LogWarning("Task has been cancelled. Message: {Message}", exception.Message);
+            else
+            {
+                _logger.LogError(exception, exception.Message);
+                await SendMessageToChat("🧨 Ha ocurrido un error 🧨", _settings.ChannelIdentifier);
+            }
         }
 
         private async Task SendMessageToChat(string message, ChatId chatId)
