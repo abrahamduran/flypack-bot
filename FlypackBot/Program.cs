@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
 using FlypackSettings = FlypackBot.Settings.Flypack;
+using MongoDbSettings = FlypackBot.Settings.MongoDb;
 using TelegramSettings = FlypackBot.Settings.Telegram;
 
 namespace FlypackBot
@@ -27,6 +28,7 @@ namespace FlypackBot
                 {
                     services.Configure<TelegramSettings>(ctx.Configuration.GetSection("Telegram"));
                     services.Configure<FlypackSettings>(ctx.Configuration.GetSection("Flypack"));
+                    services.Configure<MongoDbSettings>(ctx.Configuration.GetSection("MongoDb"));
                     services.AddScoped<FlypackService>();
                     services.AddScoped<FlypackScrapper>();
                     services.AddHostedService<Worker>();

@@ -1,8 +1,9 @@
 version: '3.4'
 
 services:
-  flypackbot:
+  flypack.bot:
     image: ${DOCKER_REGISTRY-}flypackbot
+    container_name: flypack.bot
     build:
       context: .
       dockerfile: FlypackBot/Dockerfile
@@ -15,3 +16,26 @@ services:
       - Telegram__AuthorizedUsers__0=${TELEGRAM_AUTHORIZED_USERS_0}
       - Telegram__ChannelIdentifier=${TELEGRAM_CHANNEL_IDENTIFIER}
       - Telegram__MaxMessageLength=${TELEGRAM_MAXIMUM_MESSAGE_LENGTH}
+      - MongoDb__Username=${MONGO_INITDB_USERNAME}
+      - MongoDb__Password=${MONGO_INITDB_PASSWORD}
+      - MongoDb__Server=flypack.db
+      - MongoDb__DatabaseName=flypack
+      - MongoDb__Port=2017
+
+  flypack.db:
+    image: mongo:latest
+    container_name: flypack.db
+    environment:
+      TZ: ${TIMEZONE}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_USERNAME: ${MONGO_INITDB_USERNAME}
+      MONGO_INITDB_PASSWORD: ${MONGO_INITDB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - ./.mongodb/entrypoint/:/docker-entrypoint-initdb.d/
+      - ./.mongodb/home:/home/mongodb/
+      - ./.mongodb/data/db/:/data/db/
+      - ./.mongodb/data/log/:/var/log/mongodb/
+    ports:
+      - "27017:27017"
