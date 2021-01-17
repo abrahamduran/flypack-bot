@@ -1,3 +1,4 @@
+using FlypackBot.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,10 +11,8 @@ namespace FlypackBot
 {
     public class Program
     {
-        public static void Main(string[] args)
-        {
+        public static void Main(string[] args) =>
             CreateHostBuilder(args).Build().Run();
-        }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
@@ -31,6 +30,8 @@ namespace FlypackBot
                     services.Configure<MongoDbSettings>(ctx.Configuration.GetSection("MongoDb"));
                     services.AddScoped<FlypackService>();
                     services.AddScoped<FlypackScrapper>();
+                    services.AddScoped<MongoDbContext>();
+                    services.AddScoped<PackagesRepository>();
                     services.AddHostedService<Worker>();
                 });
     }

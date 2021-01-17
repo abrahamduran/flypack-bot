@@ -12,4 +12,7 @@
     <PackageReference Include="ScrapySharp" Version="3.0.0" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Persistence\" />
+  </ItemGroup>
 </Project>
