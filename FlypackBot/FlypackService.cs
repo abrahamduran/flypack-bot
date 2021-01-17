@@ -16,20 +16,22 @@ namespace FlypackBot
         private const int MAX_RETRIES = 3;
         private int _retriesCount = 0;
         private string _path;
+        private IEnumerable<Package> _currentPackages = new List<Package>();
+
         private readonly ILogger<FlypackService> _logger;
         private readonly FlypackScrapper _flypack;
         private readonly FlypackSettings _settings;
-        private List<Package> _currentPackages = new List<Package>();
-        private Dictionary<string, Package> _previousPackages = new Dictionary<string, Package>();
+        private readonly PackagesRepository _repository;
         
         public event EventHandler<PackagesEventArgs> OnUpdate;
         public event EventHandler OnFailedLogin;
         public event EventHandler OnFailedFetch;
 
-        public FlypackService(ILogger<FlypackService> logger, FlypackScrapper flypack, IOptions<FlypackSettings> options)
+        public FlypackService(ILogger<FlypackService> logger, FlypackScrapper flypack, PackagesRepository repository, IOptions<FlypackSettings> options)
         {
             _logger = logger;
             _flypack = flypack;
+            _repository = repository;
             _settings = options.Value;
         }
 
@@ -40,6 +42,7 @@ namespace FlypackBot
 
             if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return; }
 
+            _currentPackages = await _repository.GetPendingAsync(cancellationToken);
 
             while (!cancellationToken.IsCancellationRequested)
             {

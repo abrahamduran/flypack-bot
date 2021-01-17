@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace FlypackBot.Models
 {
     public struct Package : IEquatable<Package>
     {
+        [BsonId]
+        [BsonElement("_id")]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string MongoId { get; set; }
         public string Identifier { get; set; }
         public string Tracking { get; set; }
         public string Description { get; set; }
@@ -43,6 +49,9 @@ namespace FlypackBot.Models
     {
         public string Description { get; set; }
         public string Percentage { get; set; }
+
+        public static PackageStatus Delivered
+            => new PackageStatus { Description = "Entregado", Percentage = "100%" };
 
         public override int GetHashCode() => Description.GetHashCode() ^ Percentage.GetHashCode();
 
