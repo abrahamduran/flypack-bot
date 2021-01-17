@@ -52,8 +52,6 @@ namespace FlypackBot
             {
                 await HandleExceptionAsync(ex);
             }
-
-            //return Task.CompletedTask;
         }
 
         public override Task StopAsync(CancellationToken cancellationToken)
