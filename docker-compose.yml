@@ -18,9 +18,9 @@ services:
       - Telegram__MaxMessageLength=${TELEGRAM_MAXIMUM_MESSAGE_LENGTH}
       - MongoDb__Username=${MONGO_INITDB_USERNAME}
       - MongoDb__Password=${MONGO_INITDB_PASSWORD}
+      - MongoDb__DatabaseName=${MONGO_INITDB_DATABASE}
       - MongoDb__Server=flypack.db
-      - MongoDb__DatabaseName=flypack
-      - MongoDb__Port=2017
+      - MongoDb__Port=27017
 
   flypack.db:
     image: mongo:latest
