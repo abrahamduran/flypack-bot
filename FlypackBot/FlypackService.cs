@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Models;
+using FlypackBot.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Telegram.Bot;
-using Telegram.Bot.Types.Enums;
 using FlypackSettings = FlypackBot.Settings.Flypack;
 
 namespace FlypackBot
@@ -47,8 +45,8 @@ namespace FlypackBot
             {
                 var packages = await FetchPackages();
 
-                if (packages?.Any() == true)
-                    OnUpdate?.Invoke(this, new PackagesEventArgs(packages, _previousPackages));
+                if (packages.Updates.Any())
+                    OnUpdate?.Invoke(this, new PackagesEventArgs(packages.Updates, packages.Previous));
 
                 await Task.Delay(TimeSpan.FromMinutes(_settings.FetchInterval), cancellationToken);
             }
@@ -73,7 +71,7 @@ namespace FlypackBot
 
         public IEnumerable<Package> GetPackages() => _currentPackages;
 
-        private async Task<IEnumerable<Package>> FetchPackages()
+        private async Task<PackageChanges> FetchPackages()
         {
             _logger.LogDebug("Executing fetch");
             IEnumerable<Package> packages;
@@ -81,30 +79,34 @@ namespace FlypackBot
             {
                 packages = await _flypack.GetPackagesAsync(_path);
             }
-            catch { return null; }
+            catch { return PackageChanges.Empty(); }
 
             if (packages == null && _retriesCount < MAX_RETRIES)
             {
                 LogFailedListPackages(_path);
                 _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
                 _retriesCount++;
-                return null;
+                return PackageChanges.Empty();
             }
             else if (_retriesCount >= MAX_RETRIES)
             {
                 LogMaxLoginAttemptsReached(_path);
-                return null;
+                return PackageChanges.Empty();
             }
             else _retriesCount = 0;
 
             return FilterPackages(packages);
         }
 
-        private List<Package> FilterPackages(IEnumerable<Package> packages)
+        private PackageChanges FilterPackages(IEnumerable<Package> packages)
         {
             var updatedPackages = packages.Except(_currentPackages).ToList();
-            _previousPackages = _currentPackages.ToDictionary(x => x.Identifier);
+            var previousPackages = _currentPackages.ToList();
             _currentPackages = packages.ToList();
+
+            var ids = packages.Select(x => x.Identifier).ToList();
+            var deletedPackages = previousPackages.Except(packages).ToList();
+            deletedPackages.RemoveAll(x => ids.Contains(x.Identifier));
 
             if (updatedPackages.Any())
             {
@@ -114,7 +116,12 @@ namespace FlypackBot
             else
                 _logger.LogInformation("No new packages were found");
 
-            return updatedPackages;
+            return new PackageChanges
+            {
+                Updates = updatedPackages,
+                Deletes = deletedPackages,
+                Previous = previousPackages.ToDictionary(x => x.Identifier)
+            };
         }
 
         private void LogFailedLogin()
@@ -133,6 +140,20 @@ namespace FlypackBot
         {
             _logger.LogWarning("Too many failed login attemps for path: {Path}", path);
             OnFailedLogin?.Invoke(this, EventArgs.Empty);
+        }
+
+        private struct PackageChanges
+        {
+            public IEnumerable<Package> Updates { get; set; }
+            public IEnumerable<Package> Deletes { get; set; }
+            public Dictionary<string, Package> Previous { get; set; }
+
+            public static PackageChanges Empty() => new PackageChanges
+            {
+                Updates = new Package[0],
+                Deletes = new Package[0],
+                Previous = new Dictionary<string, Package>()
+            };
         }
     }
 }
