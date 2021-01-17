@@ -72,7 +72,7 @@ namespace FlypackBot
                     Identifier = info[0],
                     Tracking = info[1],
                     Description = description,
-                    Delivered = deliveredDate,
+                    DeliveredAt = deliveredDate,
                     Weight = weight,
                     Status = new PackageStatus { Description = status, Percentage = percentage }
                 });

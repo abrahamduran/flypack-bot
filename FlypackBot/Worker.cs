@@ -127,7 +127,7 @@ namespace FlypackBot
                         $"*Id*: {x.Identifier}\n" +
                         $"*Descripción*: {x.Description}\n" +
                         $"*Tracking*: {x.Tracking}\n" +
-                        $"*Recibido*: {x.Delivered.ToString("MMM dd, yyyy")}\n" +
+                        $"*Recibido*: {x.DeliveredAt.ToString("MMM dd, yyyy")}\n" +
                         $"*Peso*: {x.Weight} libras\n" +
                         $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
                     )
@@ -248,7 +248,7 @@ namespace FlypackBot
                 messages.Add($"*Tracking*: {package.Tracking}");
 
                 if (!isUpdate)
-                    messages.Add($"*Recibido*: {package.Delivered:MMM dd, yyyy}");
+                    messages.Add($"*Recibido*: {package.DeliveredAt:MMM dd, yyyy}");
 
                 var previous = previousPackages != null && previousPackages.ContainsKey(package.Identifier)
                     ? previousPackages[package.Identifier] : package;

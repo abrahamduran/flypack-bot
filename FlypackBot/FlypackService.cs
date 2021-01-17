@@ -22,7 +22,8 @@ namespace FlypackBot
         private readonly FlypackScrapper _flypack;
         private readonly FlypackSettings _settings;
         private readonly PackagesRepository _repository;
-        
+        private readonly TimeSpan _fetchInterval;
+
         public event EventHandler<PackagesEventArgs> OnUpdate;
         public event EventHandler OnFailedLogin;
         public event EventHandler OnFailedFetch;
@@ -33,6 +34,7 @@ namespace FlypackBot
             _flypack = flypack;
             _repository = repository;
             _settings = options.Value;
+            _fetchInterval = TimeSpan.FromMinutes(_settings.FetchInterval);
         }
 
         public async Task SubscribeAsync(CancellationToken cancellationToken)
@@ -51,7 +53,9 @@ namespace FlypackBot
                 if (packages.Updates.Any())
                     OnUpdate?.Invoke(this, new PackagesEventArgs(packages.Updates, packages.Previous));
 
-                await Task.Delay(TimeSpan.FromMinutes(_settings.FetchInterval), cancellationToken);
+                await StoreChanges(packages, cancellationToken);
+
+                await Task.Delay(_fetchInterval, cancellationToken);
             }
 
             _logger.LogInformation("Cancellation requested");
@@ -125,6 +129,22 @@ namespace FlypackBot
                 Deletes = deletedPackages,
                 Previous = previousPackages.ToDictionary(x => x.Identifier)
             };
+        }
+
+        private async Task StoreChanges(PackageChanges changes, CancellationToken cancellationToken)
+        {
+            var packages = new List<Package>(changes.Updates.Count() + changes.Deletes.Count());
+            packages.AddRange(changes.Updates);
+
+            foreach (var item in changes.Deletes)
+            {
+                var delete = item;
+                delete.Status = PackageStatus.Delivered;
+                packages.Append(delete);
+            }
+
+            if (packages.Any())
+                await _repository.UpsertAsync(packages, cancellationToken);
         }
 
         private void LogFailedLogin()
