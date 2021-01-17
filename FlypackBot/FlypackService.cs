@@ -16,8 +16,8 @@ namespace FlypackBot
     public class FlypackService
     {
         private const int MAX_RETRIES = 3;
-        private string _path;
         private int _retriesCount = 0;
+        private string _path;
         private readonly ILogger<FlypackService> _logger;
         private readonly FlypackScrapper _flypack;
         private readonly FlypackSettings _settings;
@@ -42,26 +42,12 @@ namespace FlypackBot
 
             if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return; }
 
+
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogDebug("Executing fetch");
-                var packages = await _flypack.GetPackagesAsync(_path);
-                if (packages == null && _retriesCount < MAX_RETRIES)
-                {
-                    LogFailedListPackages(_path);
-                    _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
-                    _retriesCount++; continue;
-                }
-                else if (_retriesCount >= MAX_RETRIES)
-                {
-                    LogMaxLoginAttemptsReached(_path);
-                    break;
-                }
-                else _retriesCount = 0;
+                var packages = await FetchPackages();
 
-                packages = FilterPackages(packages);
-
-                if (packages.Any())
+                if (packages?.Any() == true)
                     OnUpdate?.Invoke(this, new PackagesEventArgs(packages, _previousPackages));
 
                 await Task.Delay(TimeSpan.FromMinutes(_settings.FetchInterval), cancellationToken);
@@ -85,28 +71,33 @@ namespace FlypackBot
             return packages;
         }
 
-        // TODO: remove this command since it's only intended to be used for debugging purpose
-        public async Task<IEnumerable<Package>> FetchPackagesAsync()
-        {
-            var packages = await _flypack.GetPackagesAsync(_path);
-            if (packages == null || !packages.Any())
-                _logger.LogWarning("Failed to retrieve packages with path: {Path}", _path);
-
-            return packages;
-        }
-
         public IEnumerable<Package> GetPackages() => _currentPackages;
-        public IEnumerable<Package> GetCurrentPackages() => _currentPackages;
-        public IEnumerable<Package> GetPreviousPackages() => _previousPackages.Values.ToList();
 
-        // TODO: remove this command since it's only intended to be used for debugging purpose
-        public string Reset()
+        private async Task<IEnumerable<Package>> FetchPackages()
         {
-            _currentPackages = new List<Package>();
-            _previousPackages = new Dictionary<string, Package>();
-            _retriesCount = 0;
-            _path = "";
-            return "Los datos han sido reiniciados ✅";
+            _logger.LogDebug("Executing fetch");
+            IEnumerable<Package> packages;
+            try
+            {
+                packages = await _flypack.GetPackagesAsync(_path);
+            }
+            catch { return null; }
+
+            if (packages == null && _retriesCount < MAX_RETRIES)
+            {
+                LogFailedListPackages(_path);
+                _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
+                _retriesCount++;
+                return null;
+            }
+            else if (_retriesCount >= MAX_RETRIES)
+            {
+                LogMaxLoginAttemptsReached(_path);
+                return null;
+            }
+            else _retriesCount = 0;
+
+            return FilterPackages(packages);
         }
 
         private List<Package> FilterPackages(IEnumerable<Package> packages)

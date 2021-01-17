@@ -182,10 +182,6 @@ namespace FlypackBot
             {
                 "/packages" => ParseMessageFor(await _service.LoginAndFetchPackagesAsync(), null, false),
                 "/packages@flypackbot" => ParseMessageFor(await _service.LoginAndFetchPackagesAsync(), null, false),
-                "/packages2" => ParseMessageFor(await _service.FetchPackagesAsync(), null, false),
-                "/current" => ParseMessageFor(_service.GetCurrentPackages(), null, false),
-                "/previous" => ParseMessageFor(_service.GetPreviousPackages(), null, false),
-                "/reset" => _service.Reset(),
                 _ => "Hasta yo quiero saber"
             };
 
