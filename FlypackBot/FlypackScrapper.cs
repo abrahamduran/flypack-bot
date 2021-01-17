@@ -106,5 +106,11 @@ namespace FlypackBot
 
             return builder.ToString();
         }
+
+        private struct Field
+        {
+            public string Name { get; set; }
+            public string Value { get; set; }
+        }
     }
 }
