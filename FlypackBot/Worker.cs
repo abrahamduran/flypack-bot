@@ -258,7 +258,7 @@ namespace FlypackBot
             var entitiesCount = 2;
             foreach (var package in packages)
             {
-                entitiesCount += 7;
+                entitiesCount += isUpdate ? 7 : 8;
                 if (entitiesCount > _settings.MaxMessageEntities)
                 {
                     messages.Add(SEPARATOR);
