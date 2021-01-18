@@ -16,6 +16,7 @@ services:
       - Telegram__AuthorizedUsers__0=${TELEGRAM_AUTHORIZED_USERS_0}
       - Telegram__ChannelIdentifier=${TELEGRAM_CHANNEL_IDENTIFIER}
       - Telegram__MaxMessageLength=${TELEGRAM_MAXIMUM_MESSAGE_LENGTH}
+      - Telegram__MaxMessageEntities=${TELEGRAM_MAXIMUM_MESSAGE_ENTITIES}
       - MongoDb__DatabaseName=${MONGO_INITDB_DATABASE}
       - MongoDb__ConnectionString=${MONGO_CONNECTION_STRING}
 

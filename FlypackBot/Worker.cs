@@ -21,6 +21,7 @@ namespace FlypackBot
     {
         private const int SIMPLE_PACKAGES_AMOUNT = 3;
         private const int CONSECUTIVE_MESSAGES_INTERVAL = 800;
+        private const string SEPARATOR = "_break-line_";
 
         private readonly ILogger<Worker> _logger;
         private readonly FlypackService _service;
@@ -221,12 +222,18 @@ namespace FlypackBot
                 {
                     await _client.SendChatActionAsync(chatId, ChatAction.Typing);
                     await Task.Delay(CONSECUTIVE_MESSAGES_INTERVAL);
+                }
             }
-        }
         }
 
         private IEnumerable<string> SplitMessage(string message)
         {
+            if (message.Contains(SEPARATOR))
+            {
+                var separatorIndex = message.IndexOf(SEPARATOR);
+                var trimmedMessage = message.Substring(0, separatorIndex);
+                return new[] { trimmedMessage }.Concat(SplitMessage(message.Substring(separatorIndex + SEPARATOR.Length)));
+            }
             if (message.Length > _settings.MaxMessageLength)
             {
                 var breaklineIndex = message.Substring(0, _settings.MaxMessageLength).LastIndexOf("\n\n");
@@ -248,8 +255,18 @@ namespace FlypackBot
 
             messages.Add("");
 
+            var entitiesCount = 2;
             foreach (var package in packages)
             {
+                entitiesCount += 7;
+                if (entitiesCount > _settings.MaxMessageEntities)
+                {
+                    messages.Add(SEPARATOR);
+                    entitiesCount = 2;
+                }
+                else
+                    messages.Add("");
+
                 var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
                 messages.Add($"*Id*: {package.Identifier}");
                 messages.Add($"*Descripción*: {description}");
@@ -270,8 +287,6 @@ namespace FlypackBot
                     messages.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎄" : ""));
                 else
                     messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎄" : ""));
-
-                messages.Add("");
             }
 
             messages.RemoveAt(messages.Count - 1);
