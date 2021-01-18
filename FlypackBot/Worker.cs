@@ -20,6 +20,7 @@ namespace FlypackBot
     public class Worker : BackgroundService
     {
         private const int SIMPLE_PACKAGES_AMOUNT = 3;
+        private const int CONSECUTIVE_MESSAGES_INTERVAL = 800;
 
         private readonly ILogger<Worker> _logger;
         private readonly FlypackService _service;
@@ -207,6 +208,7 @@ namespace FlypackBot
         {
             var messages = SplitMessage(message);
 
+            var lastMsg = messages.Last();
             foreach (var msg in messages)
             {
                 await _client.SendTextMessageAsync(
@@ -214,7 +216,13 @@ namespace FlypackBot
                     text: msg,
                     parseMode: ParseMode.Markdown
                 );
+
+                if (msg != lastMsg)
+                {
+                    await _client.SendChatActionAsync(chatId, ChatAction.Typing);
+                    await Task.Delay(CONSECUTIVE_MESSAGES_INTERVAL);
             }
+        }
         }
 
         private IEnumerable<string> SplitMessage(string message)
