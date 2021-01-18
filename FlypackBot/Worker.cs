@@ -286,7 +286,7 @@ namespace FlypackBot
                 if (previous.Status != package.Status)
                     messages.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎄" : ""));
                 else
-                    messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎄" : ""));
+                    messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
             }
 
             messages.RemoveAt(messages.Count - 1);
