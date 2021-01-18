@@ -127,7 +127,7 @@ namespace FlypackBot
                     var content = new InputTextMessageContent(
                         $"*Id*: {x.Identifier}\n" +
                         $"*Descripción*: {x.Description}\n" +
-                        $"*Tracking*: {x.Tracking}\n" +
+                        $"*Tracking*: `{x.Tracking}`\n" +
                         $"*Recibido*: {x.DeliveredAt.ToString("MMM dd, yyyy")}\n" +
                         $"*Peso*: {x.Weight} libras\n" +
                         $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
@@ -253,7 +253,7 @@ namespace FlypackBot
                 var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
                 messages.Add($"*Id*: {package.Identifier}");
                 messages.Add($"*Descripción*: {description}");
-                messages.Add($"*Tracking*: {package.Tracking}");
+                messages.Add($"*Tracking*: `{package.Tracking}`");
 
                 if (!isUpdate)
                     messages.Add($"*Recibido*: {package.DeliveredAt:MMM dd, yyyy}");
