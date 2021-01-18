@@ -140,7 +140,7 @@ namespace FlypackBot
             {
                 var delete = item;
                 delete.Status = PackageStatus.Delivered;
-                packages.Append(delete);
+                packages.Add(delete);
             }
 
             if (packages.Any())
