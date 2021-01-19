@@ -253,8 +253,6 @@ namespace FlypackBot
             if (packages.Count() > SIMPLE_PACKAGES_AMOUNT && !isUpdate)
                 messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
 
-            messages.Add("");
-
             var entitiesCount = 2;
             foreach (var package in packages)
             {
@@ -289,7 +287,6 @@ namespace FlypackBot
                     messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
             }
 
-            messages.RemoveAt(messages.Count - 1);
             return string.Join('\n', messages);
         }
     }
