@@ -39,11 +39,6 @@ namespace FlypackBot
 
         public async Task SubscribeAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Login into Flypack with account: {account}", _settings.Username);
-            _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
-
-            if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return; }
-
             _currentPackages = await _repository.GetPendingAsync(cancellationToken);
 
             while (!cancellationToken.IsCancellationRequested)
@@ -84,6 +79,14 @@ namespace FlypackBot
             IEnumerable<Package> packages;
             try
             {
+                if (string.IsNullOrEmpty(_path))
+                {
+                    _logger.LogInformation("Login into Flypack with account: {account}", _settings.Username);
+                    _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
+                }
+
+                if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return PackageChanges.Empty(); }
+
                 packages = await _flypack.GetPackagesAsync(_path);
             }
             catch { return PackageChanges.Empty(); }
