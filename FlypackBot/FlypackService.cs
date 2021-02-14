@@ -85,23 +85,23 @@ namespace FlypackBot
                     _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
                 }
 
-                if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return PackageChanges.Empty(); }
+                if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return PackageChanges.Empty; }
 
                 packages = await _flypack.GetPackagesAsync(_path);
             }
-            catch { return PackageChanges.Empty(); }
+            catch { return PackageChanges.Empty; }
 
             if (packages == null && _retriesCount < MAX_RETRIES)
             {
                 LogFailedListPackages(_path);
                 _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
                 _retriesCount++;
-                return PackageChanges.Empty();
+                return await FetchPackages();
             }
             else if (_retriesCount >= MAX_RETRIES)
             {
                 LogMaxLoginAttemptsReached(_path);
-                return PackageChanges.Empty();
+                return PackageChanges.Empty;
             }
             else _retriesCount = 0;
 
@@ -174,7 +174,7 @@ namespace FlypackBot
             public IEnumerable<Package> Deletes { get; set; }
             public Dictionary<string, Package> Previous { get; set; }
 
-            public static PackageChanges Empty() => new PackageChanges
+            public static PackageChanges Empty => new PackageChanges
             {
                 Updates = new Package[0],
                 Deletes = new Package[0],

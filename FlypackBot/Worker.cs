@@ -45,6 +45,7 @@ namespace FlypackBot
             _service.OnUpdate += OnFlypackUpdate;
             _service.OnFailedLogin += OnFlypackFailedLogin;
             _service.OnFailedFetch += OnFlypackFailedFetch;
+
             try
             {
                 _client.StartReceiving(cancellationToken: stoppingToken);
