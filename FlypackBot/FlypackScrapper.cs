@@ -35,8 +35,8 @@ namespace FlypackBot
                 new Field() { Name = "text2", Value = password }
             };
             var html = await GetHtmlAsync($"{BASE_URL}/run.php", HttpVerb.Post, data, "application /x-www-form-urlencoded");
-            var script = html?.SelectSingleNode("//script").InnerText;
-            var nextLocation = script?.Replace("window.location='", "").Replace("';\r\n      ", "");
+            var script = html?.SelectSingleNode("//script")?.InnerText;
+            var nextLocation = script?.Replace("window.location='", "")?.Replace("';\r\n      ", "");
             return nextLocation;
         }
 
