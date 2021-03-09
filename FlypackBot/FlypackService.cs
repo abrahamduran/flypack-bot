@@ -67,8 +67,7 @@ namespace FlypackBot
         public async Task<IEnumerable<Package>> LoginAndFetchPackagesAsync()
         {
             var path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
-            var packages = await _flypack.GetPackagesAsync(path);
-            return packages;
+            return await _flypack.GetPackagesAsync(path);
         }
 
         public IEnumerable<Package> GetPackages() => _currentPackages;
