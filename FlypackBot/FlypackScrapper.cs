@@ -50,7 +50,7 @@ namespace FlypackBot
             {
                 _logger.LogWarning("Response structure seems to differ from the expected. Unable to find packages for path: {Path}", path);
                 if (html.InnerText.Contains(SESSION_EXPIRED_MESSAGE))
-                    _logger.LogError("Logged session has expired");
+                    _logger.LogWarning("Logged session has expired");
 
                 return null;
             }
