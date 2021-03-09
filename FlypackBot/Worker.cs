@@ -162,7 +162,7 @@ namespace FlypackBot
             => await SendMessageToChat("⚠️ Hubo un error al iniciar sesión ⚠️", _settings.ChannelIdentifier);
 
         private async void OnFlypackFailedFetch(object sender, EventArgs e)
-            => await SendMessageToChat("⚠️ Ocurrió un error al intentar recuperar la lista de paquetes ⚠️", _settings.ChannelIdentifier);
+            => await SendMessageToChat("⚠️ Ocurrió un error al intentar recuperar la lista de paquetes ⚠️", _settings.ChannelIdentifier, true);
         #endregion
 
         private async Task AnswerChannelMessage(Message message)
@@ -206,7 +206,7 @@ namespace FlypackBot
             }
         }
 
-        private async Task SendMessageToChat(string message, ChatId chatId)
+        private async Task SendMessageToChat(string message, ChatId chatId, bool disableNotification = false)
         {
             var messages = SplitMessage(message);
 
@@ -216,7 +216,8 @@ namespace FlypackBot
                 await _client.SendTextMessageAsync(
                     chatId: chatId,
                     text: msg,
-                    parseMode: ParseMode.Markdown
+                    parseMode: ParseMode.Markdown,
+                    disableNotification: disableNotification
                 );
 
                 if (msg != lastMsg)
