@@ -16,6 +16,7 @@ namespace FlypackBot
     {
         private const string BASE_URL = "https://www.flypack.com.do";
         private const string SESSION_EXPIRED_MESSAGE = "Session expirada, ingrese nuevamente al sistema";
+        private const string PACKAGES_PAGE_TITLE = "<h2 class=\"mb-4\">Mis Paquetes</h2>";
         private readonly ILogger<FlypackScrapper> _logger;
         private readonly ScrapingBrowser _browser;
 
@@ -46,7 +47,7 @@ namespace FlypackBot
             var html = await GetHtmlAsync($"{BASE_URL}/{path}", HttpVerb.Get, null, null);
             var rows = html.CssSelect("tbody > tr");
 
-            if (!rows.Any())
+            if (!rows.Any() && !html.InnerHtml.Contains(PACKAGES_PAGE_TITLE))
             {
                 _logger.LogWarning("Response structure seems to differ from the expected. Unable to find packages for path: {Path}", path);
                 if (html.InnerText.Contains(SESSION_EXPIRED_MESSAGE))
