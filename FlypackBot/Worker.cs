@@ -126,14 +126,8 @@ namespace FlypackBot
                 var query = e.InlineQuery.Query.ToLower();
                 var results = _service.GetPackages().Where(x => x.ContainsQuery(query)).Select(x =>
                 {
-                    var content = new InputTextMessageContent(
-                        $"*Id*: {x.Identifier}\n" +
-                        $"*Descripción*: {x.Description}\n" +
-                        $"*Tracking*: `{x.Tracking}`\n" +
-                        $"*Recibido*: {x.DeliveredAt.ToString("MMM dd, yyyy")}\n" +
-                        $"*Peso*: {x.Weight} libras\n" +
-                        $"*Estado*: {x.Status.Description}, _{x.Status.Percentage}_"
-                    )
+                    var message = ParseMessageFor(x, null, true);
+                    var content = new InputTextMessageContent(string.Join('\n', message))
                     { ParseMode = ParseMode.Markdown };
 
                     return new InlineQueryResultArticle(x.Identifier, x.Description, content)
@@ -250,7 +244,7 @@ namespace FlypackBot
             if (packages == null || !packages.Any())
                 return "⚠️ Lista de paquetes vacía ⚠️";
 
-            List<string> messages = new List<string>();
+            var messages = new List<string>();
             messages.Add($"*Estado de paquetes*");
             if (packages.Count() > SIMPLE_PACKAGES_AMOUNT && !isUpdate)
                 messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
@@ -267,29 +261,37 @@ namespace FlypackBot
                 else
                     messages.Add("");
 
-                var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
-                messages.Add($"*Id*: {package.Identifier}");
-                messages.Add($"*Descripción*: {description}");
-                messages.Add($"*Tracking*: `{package.Tracking}`");
-
-                if (!isUpdate)
-                    messages.Add($"*Recibido*: {package.DeliveredAt:MMM dd, yyyy}");
-
-                var previous = previousPackages != null && previousPackages.ContainsKey(package.Identifier)
-                    ? previousPackages[package.Identifier] : package;
-
-                if (previous.Weight != package.Weight)
-                    messages.Add($"*Peso*: {previous.Weight} → {package.Weight} libras");
-                else
-                    messages.Add($"*Peso*: {package.Weight} libras");
-
-                if (previous.Status != package.Status)
-                    messages.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
-                else
-                    messages.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
+                messages.AddRange(ParseMessageFor(package, previousPackages, !isUpdate));
             }
 
             return string.Join('\n', messages);
+        }
+
+        private IEnumerable<string> ParseMessageFor(Package package, Dictionary<string, Package> previousPackages, bool includesDeliveryDate)
+        {
+            var message = new List<string>(includesDeliveryDate ? 6 : 5);
+
+            var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
+            message.Add($"*Id*: {package.Identifier}");
+            message.Add($"*Descripción*: {description}");
+            message.Add($"*Tracking*: `{package.Tracking}`");
+
+            if (includesDeliveryDate)
+                message.Add($"*Recibido*: {package.DeliveredAt:MMM dd, yyyy}");
+
+            var previous = previousPackages?.ContainsKey(package.Identifier) == true ? previousPackages[package.Identifier] : package;
+
+            if (previous.Weight != package.Weight)
+                message.Add($"*Peso*: {previous.Weight} → {package.Weight} libras");
+            else
+                message.Add($"*Peso*: {package.Weight} libras");
+
+            if (previous.Status != package.Status)
+                message.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
+            else
+                message.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
+
+            return message;
         }
     }
 
