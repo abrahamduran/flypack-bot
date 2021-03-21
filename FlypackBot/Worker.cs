@@ -134,7 +134,15 @@ namespace FlypackBot
                     {
                         Description = $"{x.Status}\n{x.Weight} libras"
                     };
-                }).ToList();
+                })
+                .DefaultIfEmpty(
+                    new InlineQueryResultArticle(
+                        "no-content-id",
+                        "Hello Darkness, My Old Friend",
+                        new InputTextMessageContent("I already told you there are no packages, why did you click me anyway?"))
+                    {  Description = "You currently have no pending packages", ThumbUrl = "http://cdn.onlinewebfonts.com/svg/img_460888.png" }
+                )
+                .ToList();
 
                 await _client.AnswerInlineQueryAsync(e.InlineQuery.Id, results, 60, true);
             }
@@ -242,7 +250,7 @@ namespace FlypackBot
         private string ParseMessageFor(IEnumerable<Package> packages, Dictionary<string, Package> previousPackages, bool isUpdate)
         {
             if (packages == null || !packages.Any())
-                return "⚠️ Lista de paquetes vacía ⚠️";
+                return "Lista de paquetes vacía 📭";
 
             var messages = new List<string>();
             messages.Add($"*Estado de paquetes*");
