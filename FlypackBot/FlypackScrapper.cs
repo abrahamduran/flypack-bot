@@ -14,7 +14,7 @@ namespace FlypackBot
 {
     public class FlypackScrapper
     {
-        private const string BASE_URL = "https://www.flypack.com.do";
+        private const string BASE_URL = "https://www.flypack.one";
         private const string SESSION_EXPIRED_MESSAGE = "Session expirada, ingrese nuevamente al sistema";
         private const string PACKAGES_PAGE_TITLE = "<h2 class=\"mb-4\">Mis Paquetes</h2>";
         private readonly ILogger<FlypackScrapper> _logger;
@@ -35,7 +35,7 @@ namespace FlypackBot
                 new Field() { Name = "text1", Value = username },
                 new Field() { Name = "text2", Value = password }
             };
-            var html = await GetHtmlAsync($"{BASE_URL}/run.php", HttpVerb.Post, data, "application /x-www-form-urlencoded");
+            var html = await GetHtmlAsync($"{BASE_URL}/run.php", HttpVerb.Post, data, "application/x-www-form-urlencoded");
             var script = html?.SelectSingleNode("//script")?.InnerText;
             var nextLocation = script?.Replace("window.location='", "")?.Replace("';\r\n      ", "");
             return nextLocation;
