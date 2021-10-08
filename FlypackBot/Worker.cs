@@ -13,6 +13,7 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.InlineQueryResults;
+using Telegram.Bot.Extensions.Polling;
 using TelegramSettings = FlypackBot.Settings.Telegram;
 
 namespace FlypackBot
@@ -38,17 +39,13 @@ namespace FlypackBot
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _client.OnUpdate += OnBotUpdate;
-            _client.OnMessage += OnBotMessage;
-            _client.OnInlineQuery += OnBotInlineQuery;
-
             _service.OnUpdate += OnFlypackUpdate;
             _service.OnFailedLogin += OnFlypackFailedLogin;
             _service.OnFailedFetch += OnFlypackFailedFetch;
 
             try
             {
-                _client.StartReceiving(cancellationToken: stoppingToken);
+                _client.StartReceiving(new DefaultUpdateHandler(HandleUpdateAsync, HandleErrorAsync), stoppingToken);
                 await _service.SubscribeAsync(stoppingToken);
             }
             catch (Exception ex)
@@ -60,119 +57,83 @@ namespace FlypackBot
         public override Task StopAsync(CancellationToken cancellationToken)
         {
             _service.StopAsync();
-            _client.StopReceiving();
             return base.StopAsync(cancellationToken);
         }
 
         #region Telegram Event Handlers
-        private async void OnBotMessage(object sender, MessageEventArgs e)
+        public async Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
         {
-            if (!_settings.AuthorizedUsers.Contains(e.Message.From.Id))
+            var userId = update.Message?.From.Id ?? update.InlineQuery?.From.Id;
+            var isUnauthorizedUser = userId is null || !_settings.AuthorizedUsers.Contains(userId ?? -1);
+            var channelId = update.ChannelPost.Chat.Id;
+            var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
+            if (isUnauthorizedUser && isUnauthorizedChannel)
             {
-                _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}", e.Message.From.Id, e.Message.From.Username);
+                var username = update.Message?.From.Username ?? update.InlineQuery?.From.Username;
+                var channelName = update.ChannelPost.Chat.Title;
+                _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}, channel: {ChannelId}: {ChannelName}", userId, username, channelId, channelName);
                 return;
             }
 
-            if (e.Message.Text?.StartsWith('/') == true)
+            var handler = update.Type switch
             {
-                try
-                {
-                    await AnswerBotCommand(e.Message);
-                }
-                catch (Exception ex)
-                {
-                    await HandleExceptionAsync(ex);
-                }
-            }
-            else if (e.Message.Text != null)
-            {
-                _logger.LogDebug("Received a text message in chat {ChatId}", e.Message.Chat.Id);
+                UpdateType.Message => OnBotMessage(update.Message),
+                UpdateType.ChannelPost => OnBotMessage(update.ChannelPost),
+                UpdateType.InlineQuery => OnBotInlineQuery(update.InlineQuery),
+                _ => Task.CompletedTask
+            };
 
+            try
+            {
+                await handler;
+            }
+            catch (Exception exception)
+            {
+                await HandleErrorAsync(client, exception, cancellationToken);
+            }
+        }
+
+        public Task HandleErrorAsync(ITelegramBotClient client, Exception exception, CancellationToken cancellationToken) => HandleExceptionAsync(exception);
+
+        private async Task OnBotMessage(Message message)
+        {
+            _logger.LogDebug("Received a text message from {ChatId}", message.Chat.Id);
+
+            if (message.Text?.StartsWith('/') == true)
+                await AnswerBotCommand(message);
+
+            else if (message.Text != null)
                 await _client.SendTextMessageAsync(
-                  chatId: e.Message.Chat,
-                  text: "You said:\n" + e.Message.Text
+                  chatId: message.Chat,
+                  text: "You said:\n" + message.Text
                 );
-            }
         }
 
-        private async void OnBotUpdate(object sender, UpdateEventArgs e)
+        private async Task OnBotInlineQuery(InlineQuery message)
         {
-            try
+            _logger.LogDebug("Received inline query from: {SenderId}", message.From.Id);
+            var text = message.Query.ToLower();
+            var results = _service.GetPackages().Where(x => x.ContainsQuery(text)).Select(x =>
             {
-                switch (e.Update.Type)
+                var message = ParseMessageFor(x, null, true);
+                var content = new InputTextMessageContent(string.Join('\n', message))
+                { ParseMode = ParseMode.Markdown };
+
+                return new InlineQueryResultArticle(x.Identifier, x.Description, content)
                 {
-                    case UpdateType.ChannelPost:
-                        await AnswerChannelMessage(e.Update.ChannelPost);
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                await HandleExceptionAsync(ex);
-            }
-        }
+                    Description = $"{x.Status}\n{x.Weight} libras"
+                };
+            })
+            .DefaultIfEmpty(
+                new InlineQueryResultArticle(
+                    "no-content-id",
+                    "Hello Darkness, My Old Friend",
+                    new InputTextMessageContent("I already told you there are no packages, why did you click me anyway?"))
+                {  Description = "You currently have no pending packages", ThumbUrl = "http://cdn.onlinewebfonts.com/svg/img_460888.png" }
+            )
+            .ToList();
 
-        private async void OnBotInlineQuery(object sender, InlineQueryEventArgs e)
-        {
-            if (!_settings.AuthorizedUsers.Contains(e.InlineQuery.From.Id))
-            {
-                _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}", e.InlineQuery.From.Id, e.InlineQuery.From.Username);
-                return;
-            }
-
-            _logger.LogDebug("Received inline query from: {SenderId}", e.InlineQuery.From.Id);
-            try
-            {
-                var query = e.InlineQuery.Query.ToLower();
-                var results = _service.GetPackages().Where(x => x.ContainsQuery(query)).Select(x =>
-                {
-                    var message = ParseMessageFor(x, null, true);
-                    var content = new InputTextMessageContent(string.Join('\n', message))
-                    { ParseMode = ParseMode.Markdown };
-
-                    return new InlineQueryResultArticle(x.Identifier, x.Description, content)
-                    {
-                        Description = $"{x.Status}\n{x.Weight} libras"
-                    };
-                })
-                .DefaultIfEmpty(
-                    new InlineQueryResultArticle(
-                        "no-content-id",
-                        "Hello Darkness, My Old Friend",
-                        new InputTextMessageContent("I already told you there are no packages, why did you click me anyway?"))
-                    {  Description = "You currently have no pending packages", ThumbUrl = "http://cdn.onlinewebfonts.com/svg/img_460888.png" }
-                )
-                .ToList();
-
-                await _client.AnswerInlineQueryAsync(e.InlineQuery.Id, results, 60, true);
-            }
-            catch (Exception ex)
-            {
-                await HandleExceptionAsync(ex);
-            }
-        }
-        #endregion
-
-        #region Flypack Event Handlers
-        private async void OnFlypackUpdate(object sender, PackagesEventArgs e)
-        {
-            var message = ParseMessageFor(e.Packages, e.PreviousPackages, true);
-            await SendMessageToChat(message, _settings.ChannelIdentifier);
-        }
-
-        private async void OnFlypackFailedLogin(object sender, EventArgs e)
-            => await SendMessageToChat("⚠️ Hubo un error al iniciar sesión ⚠️", _settings.ChannelIdentifier);
-
-        private async void OnFlypackFailedFetch(object sender, EventArgs e)
-            => await SendMessageToChat("⚠️ Ocurrió un error al intentar recuperar la lista de paquetes ⚠️", _settings.ChannelIdentifier, true);
-        #endregion
-
-        private async Task AnswerChannelMessage(Message message)
-        {
-            _logger.LogDebug("Received a text message in channel {ChatId}", message.Chat.Id);
-            if (message.Chat.Id != _settings.ChannelIdentifier) return;
-
-            await AnswerBotCommand(message);
+            await _client.AnswerInlineQueryAsync(message.Id, results, 60, true);
         }
 
         private async Task AnswerBotCommand(Message message)
@@ -196,6 +157,22 @@ namespace FlypackBot
 
             await SendMessageToChat(stringMessage, message.Chat);
         }
+
+        #endregion
+
+        #region Flypack Event Handlers
+        private async void OnFlypackUpdate(object sender, PackagesEventArgs e)
+        {
+            var message = ParseMessageFor(e.Packages, e.PreviousPackages, true);
+            await SendMessageToChat(message, _settings.ChannelIdentifier);
+        }
+
+        private async void OnFlypackFailedLogin(object sender, EventArgs e)
+            => await SendMessageToChat("⚠️ Hubo un error al iniciar sesión ⚠️", _settings.ChannelIdentifier);
+
+        private async void OnFlypackFailedFetch(object sender, EventArgs e)
+            => await SendMessageToChat("⚠️ Ocurrió un error al intentar recuperar la lista de paquetes ⚠️", _settings.ChannelIdentifier, true);
+        #endregion
 
         private async Task HandleExceptionAsync(Exception exception)
         {
