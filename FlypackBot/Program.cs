@@ -1,3 +1,5 @@
+using FlypackBot.Application.Commands;
+using FlypackBot.Application.Services;
 using FlypackBot.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -25,14 +27,21 @@ namespace FlypackBot
                 )
                 .ConfigureServices((ctx, services) =>
                 {
+                    services.AddHostedService<Worker>();
+                    services.AddSingleton<ChatSessionService>();
+                    services.AddSingleton<ChatSessionRepository>();
                     services.Configure<TelegramSettings>(ctx.Configuration.GetSection("Telegram"));
                     services.Configure<FlypackSettings>(ctx.Configuration.GetSection("Flypack"));
                     services.Configure<MongoDbSettings>(ctx.Configuration.GetSection("MongoDb"));
-                    services.AddScoped<FlypackService>();
-                    services.AddScoped<FlypackScrapper>();
-                    services.AddScoped<MongoDbContext>();
-                    services.AddScoped<PackagesRepository>();
-                    services.AddHostedService<Worker>();
+                    // TODO: migrate to scope services (eg: commands, AddScoped)
+                    services.AddSingleton<StartCommand>();
+                    services.AddSingleton<PasswordEncrypterService>();
+                    services.AddSingleton<PasswordDecrypterService>();
+                    services.AddSingleton<FlypackService>();
+                    services.AddSingleton<FlypackScrapper>();
+                    services.AddSingleton<MongoDbContext>();
+                    services.AddSingleton<PackagesRepository>();
+                    services.AddSingleton<UserRepository>();
                 });
     }
 }

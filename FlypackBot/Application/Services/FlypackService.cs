@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using FlypackSettings = FlypackBot.Settings.Flypack;
 
-namespace FlypackBot
+namespace FlypackBot.Application.Services
 {
     public class FlypackService
     {
@@ -37,26 +37,29 @@ namespace FlypackBot
             _fetchInterval = TimeSpan.FromMinutes(_settings.FetchInterval);
         }
 
-        public async Task SubscribeAsync(CancellationToken cancellationToken)
+        public void StartReceiving(CancellationToken cancellationToken)
         {
-            _currentPackages = await _repository.GetPendingAsync(cancellationToken);
+            _logger.LogInformation("Starting FlypackService");
 
-            while (!cancellationToken.IsCancellationRequested)
+            Task.Run(async () =>
             {
-                var packages = await FetchPackages();
+                _currentPackages = await _repository.GetPendingAsync(cancellationToken);
 
-                if (packages.Updates.Any())
-                    OnUpdate?.Invoke(this, new PackagesEventArgs(packages.Updates, packages.Previous));
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    var packages = await FetchPackages();
 
-                await StoreChanges(packages, cancellationToken);
+                    if (packages.Updates.Any())
+                        OnUpdate?.Invoke(this, new PackagesEventArgs(packages.Updates, packages.Previous));
 
-                await Task.Delay(_fetchInterval, cancellationToken);
-            }
+                    await StoreChanges(packages, cancellationToken);
 
-            _logger.LogInformation("Cancellation requested");
+                    await Task.Delay(_fetchInterval, cancellationToken);
+                }
+            }, cancellationToken);
         }
 
-        public void StopAsync()
+        public void Stop()
         {
             _logger.LogInformation("Stopping FlypackService");
             OnFailedFetch = null;
@@ -64,9 +67,12 @@ namespace FlypackBot
             OnUpdate = null;
         }
 
+        public async Task<bool> TestCredentialsAsync(string username, string password)
+            => (await _flypack.LoginAsync(username, password)) != null;
+
         public async Task<IEnumerable<Package>> LoginAndFetchPackagesAsync()
         {
-            var path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
+            var path = await _flypack.LoginAsync("", "");// _settings.Username, _settings.Password);
             return await _flypack.GetPackagesAsync(path);
         }
 
@@ -80,8 +86,8 @@ namespace FlypackBot
             {
                 if (string.IsNullOrEmpty(_path))
                 {
-                    _logger.LogInformation("Login into Flypack with account: {account}", _settings.Username);
-                    _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
+                    _logger.LogInformation("Login into Flypack with account: {account}", "");// _settings.Username);
+                    _path = await _flypack.LoginAsync("", "");// _settings.Username, _settings.Password);
                 }
 
                 if (string.IsNullOrEmpty(_path)) { LogFailedLogin(); return PackageChanges.Empty; }
@@ -93,7 +99,7 @@ namespace FlypackBot
             if (packages == null && _retriesCount < MAX_RETRIES)
             {
                 LogFailedListPackages(_path);
-                _path = await _flypack.LoginAsync(_settings.Username, _settings.Password);
+                _path = await _flypack.LoginAsync("", "");// _settings.Username, _settings.Password);
                 _retriesCount++;
                 return await FetchPackages();
             }
@@ -151,7 +157,7 @@ namespace FlypackBot
 
         private void LogFailedLogin()
         {
-            _logger.LogWarning("Failed login for account: {Account}", _settings.Username);
+            _logger.LogWarning("Failed login for account: {Account}", "");// _settings.Username);
             OnFailedLogin?.Invoke(this, EventArgs.Empty);
         }
         
