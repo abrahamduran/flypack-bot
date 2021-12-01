@@ -43,9 +43,9 @@ namespace FlypackBot
             await _session.LoadAsync(cancellationToken);
 
             //Telegram
-            var allowed = new[] { UpdateType.Message,/* UpdateType.ChannelPost, UpdateType.InlineQuery,*/ UpdateType.CallbackQuery };
+            var allowed = new[] { UpdateType.Message,/* UpdateType.ChannelPost,*/ UpdateType.InlineQuery, UpdateType.CallbackQuery };
             var receiverOptions = new ReceiverOptions() { AllowedUpdates = allowed };
-            _telegram.StartReceiving(new TelegramUpdateHandler(_session, _startCommand, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
+            _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _startCommand, _settings, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
 
             // Flypack
             _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, HandleExceptionAsync, _logger), cancellationToken);
@@ -74,12 +74,5 @@ namespace FlypackBot
                 );
             }
         }
-
-        //internal static class PackageExtension
-        //{
-        //    internal static bool ContainsQuery(this Package package, string query)
-        //        => (package.Identifier + package.Description + package.Status + package.Tracking)
-        //            .ToLower().Contains(query) || string.IsNullOrEmpty(query);
-        //}
     }
 }

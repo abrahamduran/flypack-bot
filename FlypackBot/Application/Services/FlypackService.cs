@@ -47,7 +47,6 @@ namespace FlypackBot.Application.Services
 
             Task.Run(async () =>
             {
-                // Get Users form userService
                 _currentPackages = (await _repository.GetPendingAsync(cancellationToken))
                         .GroupBy(x => x.Username)
                         .ToDictionary(x => x.Key, x => x.AsEnumerable());
@@ -80,19 +79,25 @@ namespace FlypackBot.Application.Services
             return await _flypack.GetPackagesAsync(path, username);
         }
 
+        public async Task<IEnumerable<Package>> GetCurrentPackagesAsync(long identifier, CancellationToken cancellationToken)
+        {
+            var user = await _userService.GetUserAsync(identifier, cancellationToken);
+            if (user.User == null) return null;
+            var username = user.User.Username;
+
+            return _currentPackages.ContainsKey(username) ? _currentPackages[username] : new Package[0];
+        }
+
         private async Task UpdateUsersPathsAndChannels(IEnumerable<UserAndChannels> users, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
             foreach (var item in users)
             {
-                // Check if we have a path for that user
                 if (_paths.ContainsKey(item.User.Username)) continue;
 
                 var task = Task.Run(async () =>
                 {
                     var username = item.User.Username;
-                    // Login with user creds and get path
-                    // Store path in a dict with identifier as the key
                     try
                     {
                         _paths[username] = await _flypack.LoginAsync(username, _decrypterService.Decrypt(item.User.Password, item.User.Salt));
@@ -217,8 +222,6 @@ namespace FlypackBot.Application.Services
 
             await Task.WhenAll(tasks);
         }
-
-        //public IEnumerable<Package> GetPackages() => _currentPackages;
 
         //private async Task<PackageChanges> FetchPackages()
         //{

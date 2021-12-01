@@ -34,7 +34,7 @@ namespace FlypackBot.Application.Commands
 
         public async Task Handle(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
         {
-            await client.SendChatActionAsync(message.Chat, ChatAction.Typing);
+            await client.SendChatActionAsync(message.Chat, ChatAction.Typing, cancellationToken);
 
             var userExists = await _userRepository.ExistsAsync(message.From.Id, cancellationToken);
             var session = _session.Get(message.Chat.Id);
@@ -112,7 +112,7 @@ namespace FlypackBot.Application.Commands
             var authorizedUsers = loggedUser?.AuthorizedUsers ?? new SecondaryUser[] { };
             if (loggedUser != null && authorizedUsers.Count(x => x.Identifier == message.From.Id) == 0)
             {
-                await NotifyUserOfLoginAttempt(client, loggedUser, message.From, message.Chat.Id);
+                await NotifyUserOfLoginAttempt(client, loggedUser, message.From, message.Chat.Id, cancellationToken);
 
                 var sent = await client.SendTextMessageAsync(
                     chatId: message.Chat,
@@ -137,46 +137,46 @@ namespace FlypackBot.Application.Commands
             var task3 = _session.RemoveAsync(message.Chat.Id);
 
             await Task.WhenAll(task1, task2, task3);
-            // fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
+            // TODO: fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
 
             await _flypack.LoginAndFetchPackagesAsync(credentials[0], credentials[1]);
         }
 
-        public async Task AnswerLoginAttemptNotification(ITelegramBotClient client, User user, Message message, string answer, SecondaryUser attemptingUser)
+        public async Task AnswerLoginAttemptNotification(ITelegramBotClient client, User user, Message message, string answer, SecondaryUser attemptingUser, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>(6);
             tasks.Add(
-                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, $"Listo, respuesta: *{answer}*", parseMode: ParseMode.Markdown)
+                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, $"Listo, respuesta: *{answer}*", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
             );
             if (answer == "denegar")
             {
                 tasks.AddRange(new[]
                 {
-                    client.SendTextMessageAsync(message.Chat, "⚠️ Te recomiendo que cambies tu contraseña tan pronto te sea posible."),
-                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, "Pues... tu intento de inicio de sesión no ha sido aprobado."),
-                    _userRepository.UpdateUnauthorizedUsersAsync(user.Id, attemptingUser)
+                    client.SendTextMessageAsync(message.Chat, "⚠️ Te recomiendo que cambies tu contraseña tan pronto te sea posible.", cancellationToken: cancellationToken),
+                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, "Pues... tu intento de inicio de sesión no ha sido aprobado.", cancellationToken: cancellationToken),
+                    _userRepository.UpdateUnauthorizedUsersAsync(user.Id, attemptingUser, cancellationToken)
                 });
             }
             else if (answer == "permitir")
             {
                 tasks.AddRange(new[]
                 {
-                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, "Tu inicio de sesión ha sido aprobado."),
-                    _userRepository.UpdateAuthorizedUsersAsync(user.Id, attemptingUser)
+                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, "Tu inicio de sesión ha sido aprobado.", cancellationToken: cancellationToken),
+                    _userRepository.UpdateAuthorizedUsersAsync(user.Id, attemptingUser, cancellationToken)
                 });
             }
 
             tasks.AddRange(new[]
             {
-                _session.RemoveAsync(attemptingUser.ChatIdentifier),
-                _session.RemoveAsync(message.Chat.Id)
+                _session.RemoveAsync(attemptingUser.ChatIdentifier, cancellationToken),
+                _session.RemoveAsync(message.Chat.Id, cancellationToken)
             });
 
             await Task.WhenAll(tasks);
-            // fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
+            // TODO: fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
         }
 
-        private async Task NotifyUserOfLoginAttempt(ITelegramBotClient client, LoggedUser user, User attemptingUser, long attemptingCbatIdentifier)
+        private async Task NotifyUserOfLoginAttempt(ITelegramBotClient client, LoggedUser user, User attemptingUser, long attemptingCbatIdentifier, CancellationToken cancellationToken)
         {
             _session.Add(new SecondaryUser { ChatIdentifier = attemptingCbatIdentifier, Identifier = attemptingUser.Id, FirstName = attemptingUser.FirstName }, user.ChatIdentifier, user.Identifier, SessionScope.LoginAttempt);
             var inlineKeyboard = new InlineKeyboardMarkup(new[]
@@ -192,7 +192,8 @@ namespace FlypackBot.Application.Commands
                 chatId: user.ChatIdentifier,
                 text: $"Hey {user.FirstName}, el usuario @{attemptingUser.Username ?? $"[{attemptingUser.FirstName}](tg://user?id={attemptingUser.Id})"} está tratando de iniciar sesión con tu cuenta de Flypack, ¿estás de acuerdo con esto?",
                 parseMode: ParseMode.Markdown,
-                replyMarkup: inlineKeyboard
+                replyMarkup: inlineKeyboard,
+                cancellationToken: cancellationToken
             );
 
             _session.Add(sent, user.Identifier, SessionScope.LoginAttempt);

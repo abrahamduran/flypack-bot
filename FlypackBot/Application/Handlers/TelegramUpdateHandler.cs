@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,19 +12,25 @@ using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.InlineQueryResults;
+using TelegramSettings = FlypackBot.Settings.Telegram;
 
 namespace FlypackBot.Application.Handlers
 {
     public class TelegramUpdateHandler : IUpdateHandler
     {
         private readonly ILogger _logger;
+        private readonly FlypackService _flypack;
+        private readonly TelegramSettings _settings;
         private readonly ChatSessionService _session;
         private readonly StartCommand _startCommand;
         private readonly Func<Exception, CancellationToken, Task> _errorHandler;
 
-        public TelegramUpdateHandler(ChatSessionService session, StartCommand startCommand, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
+        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, StartCommand startCommand, TelegramSettings settings, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
         {
             _session = session;
+            _flypack = flypack;
+            _settings = settings;
             _startCommand = startCommand;
             _errorHandler = errorHandler;
             _logger = logger;
@@ -30,26 +38,23 @@ namespace FlypackBot.Application.Handlers
 
         public Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
         {
-            //var userId = update.Message?.From.Id ?? update.InlineQuery?.From.Id ?? update.CallbackQuery.From?.Id;
-            //var isUnauthorizedUser = userId is null || !_settings.AuthorizedUsers.Contains(userId ?? -1);
-            ////var channelId = update.ChannelPost?.Chat.Id;
-            ////var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
-            ////if (isUnauthorizedUser && isUnauthorizedChannel)
-            //if (isUnauthorizedUser)
-            //{
-            //    var username = update.Message?.From.Username ?? update.InlineQuery?.From.Username;
-            //    //var channelName = update.ChannelPost?.Chat.Title;
-            //    //_logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}, channel: {ChannelId}: {ChannelName}", userId, username, channelId, channelName);
-            //    _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}", userId, username);
-            //    return Task.CompletedTask;
-            //}
+            var userId = update.Message?.From.Id ?? update.InlineQuery?.From.Id ?? update.CallbackQuery.From?.Id;
+            var channelId = update.ChannelPost?.Chat.Id;
+            var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
+            if (update.ChannelPost != null && isUnauthorizedChannel)
+            {
+                var username = update.Message?.From.Username ?? update.InlineQuery?.From.Username;
+                var channelName = update.ChannelPost?.Chat.Title;
+                _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}, channel: {ChannelId}: {ChannelName}", userId, username, channelId, channelName);
+                return Task.CompletedTask;
+            }
 
             var handler = update.Type switch
             {
                 UpdateType.Message => OnBotMessage(client, update.Message, cancellationToken),
                 //UpdateType.ChannelPost => OnBotMessage(client, update.ChannelPost),
-                //UpdateType.InlineQuery => OnBotInlineQuery(client, update.InlineQuery),
-                UpdateType.CallbackQuery => OnCallbackQueryReceived(client, update.CallbackQuery),
+                UpdateType.InlineQuery => OnBotInlineQuery(client, update.InlineQuery, cancellationToken),
+                UpdateType.CallbackQuery => OnCallbackQueryReceived(client, update.CallbackQuery, cancellationToken),
                 _ => Task.CompletedTask
             };
 
@@ -112,38 +117,69 @@ namespace FlypackBot.Application.Handlers
             };
         }
 
-        private Task OnCallbackQueryReceived(ITelegramBotClient client, CallbackQuery callbackQuery)
+        private Task OnCallbackQueryReceived(ITelegramBotClient client, CallbackQuery callbackQuery, CancellationToken cancellationToken)
         {
             var session = _session.Get(callbackQuery.Message.Chat.Id);
             if (session != null && session.Scope != SessionScope.LoginAttempt && session.AttemptingUser == null) return Task.CompletedTask;
-            return _startCommand.AnswerLoginAttemptNotification(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, session.AttemptingUser);
+            return _startCommand.AnswerLoginAttemptNotification(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, session.AttemptingUser, cancellationToken);
         }
 
-        //private async Task OnBotInlineQuery(ITelegramBotClient client, InlineQuery message)
-        //{
-        //    _logger.LogDebug("Received inline query from: {SenderId}", message.From.Id);
-        //    var text = message.Query.ToLower();
-        //    var results = _service.GetPackages().Where(x => x.ContainsQuery(text)).Select(x =>
-        //    {
-        //        var message = ParseMessageFor(x, null, true);
-        //        var content = new InputTextMessageContent(string.Join('\n', message))
-        //        { ParseMode = ParseMode.Markdown };
+        private async Task OnBotInlineQuery(ITelegramBotClient client, InlineQuery message, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Received inline query from: {SenderId}", message.From.Id);
+            var text = message.Query.ToLower();
+            var packages = await _flypack.GetCurrentPackagesAsync(message.From.Id, cancellationToken);
 
-        //        return new InlineQueryResultArticle(x.Identifier, x.Description, content)
-        //        {
-        //            Description = $"{x.Status}\n{x.Weight} libras"
-        //        };
-        //    })
-        //    .DefaultIfEmpty(
-        //        new InlineQueryResultArticle(
-        //            "no-content-id",
-        //            "Hello Darkness, My Old Friend",
-        //            new InputTextMessageContent("I already told you there are no packages, why did you click me anyway?"))
-        //        { Description = "You currently have no pending packages", ThumbUrl = "http://cdn.onlinewebfonts.com/svg/img_460888.png" }
-        //    )
-        //    .ToList();
+            if (packages == null)
+            {
+                await client.AnswerInlineQueryAsync(message.Id, new InlineQueryResultArticle[0], cancellationToken: cancellationToken);
+                return;
+            }
 
-        //    await _client.AnswerInlineQueryAsync(message.Id, results, 60, true);
-        //}
+            var results = packages.Where(x => x.ContainsQuery(text)).Select(x =>
+            {
+                var message = ParseMessageFor(x);
+                var content = new InputTextMessageContent(string.Join('\n', message))
+                { ParseMode = ParseMode.Markdown };
+
+                return new InlineQueryResultArticle(x.Identifier, x.Description, content)
+                {
+                    Description = $"{x.Status}\n{x.Weight} libras"
+                };
+            })
+            //.DefaultIfEmpty(
+            //    new InlineQueryResultArticle(
+            //        "no-content-id",
+            //        "Hello Darkness, My Old Friend",
+            //        new InputTextMessageContent("I already told you there are no packages, why did you click me anyway?"))
+            //    { Description = "You currently have no pending packages", ThumbUrl = "http://cdn.onlinewebfonts.com/svg/img_460888.png" }
+            //)
+            .ToList();
+
+            await client.AnswerInlineQueryAsync(message.Id, results, 60, true, cancellationToken: cancellationToken);
+        }
+
+
+        private IEnumerable<string> ParseMessageFor(Package package)
+        {
+            var message = new List<string>(6);
+
+            var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
+            message.Add($"*Id*: {package.Identifier}");
+            message.Add($"*Descripción*: {description}");
+            message.Add($"*Tracking*: `{package.Tracking}`");
+            message.Add($"*Recibido*: {package.DeliveredAt:MMM dd, yyyy}");
+            message.Add($"*Peso*: {package.Weight} libras");
+            message.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
+
+            return message;
+        }
+    }
+
+    internal static class PackageExtension
+    {
+        internal static bool ContainsQuery(this Package package, string query)
+            => (package.Identifier + package.Description + package.Status + package.Tracking)
+                .ToLower().Contains(query) || string.IsNullOrEmpty(query);
     }
 }

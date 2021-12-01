@@ -17,24 +17,18 @@ namespace FlypackBot.Application.Services
         public UserService(UserRepository userRepository)
             => _repository = userRepository;
 
+        public async Task<UserAndChannels> GetUserAsync(long identifier, CancellationToken cancellationToken)
+        {
+            if (_users == null || !_users.Any())
+                await FetchUsers(cancellationToken);
+
+            return _users.ContainsKey(identifier) ? _users[identifier] : UserAndChannels.Empty;
+        }
+
         public async Task<IEnumerable<UserAndChannels>> GetUsersAsync(CancellationToken cancellationToken)
         {
             if (_users == null || !_users.Any())
-            {
-                var users = await _repository.GetListAsync(x => true, cancellationToken);
-                if (users == null) return null;
-
-                _users = users.ToDictionary(
-                    x => x.Identifier,
-                    x => new UserAndChannels
-                    {
-                        User = x,
-                        Channels = (x.AuthorizedUsers?.Select(a => a.ChatIdentifier) ?? new List<long>(1))
-                            .Append(x.ChatIdentifier)
-                    }
-                );
-            }
-                
+                await FetchUsers(cancellationToken);
 
             return _users.Values;
         }
@@ -46,5 +40,21 @@ namespace FlypackBot.Application.Services
                 Channels = (user.AuthorizedUsers?.Select(a => a.ChatIdentifier) ?? new List<long>(1))
                     .Append(user.ChatIdentifier)
             };
+
+        private async Task FetchUsers(CancellationToken cancellationToken)
+        {
+            var users = await _repository.GetListAsync(x => true, cancellationToken);
+            if (users == null) return;
+
+            _users = users.ToDictionary(
+                x => x.Identifier,
+                x => new UserAndChannels
+                {
+                    User = x,
+                    Channels = (x.AuthorizedUsers?.Select(a => a.ChatIdentifier) ?? new List<long>(1))
+                        .Append(x.ChatIdentifier)
+                }
+            );
+        }
     }
 }
