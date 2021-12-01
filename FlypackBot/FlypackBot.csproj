@@ -20,5 +20,9 @@
     <Folder Include="Application\Services\" />
     <Folder Include="Application\Helpers\" />
     <Folder Include="Application\Extensions\" />
+    <Folder Include="Infraestructure\" />
+    <Folder Include="Domain\Models\" />
+    <Folder Include="Application\Models\" />
+    <Folder Include="Application\Handlers\" />
   </ItemGroup>
 </Project>

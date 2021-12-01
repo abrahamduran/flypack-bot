@@ -4,7 +4,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Telegram.Bot.Types;
 
-namespace FlypackBot.Models
+namespace FlypackBot.Domain.Models
 {
     public class ChatSession
     {

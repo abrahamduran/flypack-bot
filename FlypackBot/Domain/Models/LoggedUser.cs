@@ -3,7 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Telegram.Bot.Types;
 
-namespace FlypackBot.Models
+namespace FlypackBot.Domain.Models
 {
     public class LoggedUser
     {
@@ -21,14 +21,14 @@ namespace FlypackBot.Models
         public ICollection<SecondaryUser> AuthorizedUsers { get; set; }
         public ICollection<SecondaryUser> UnauthorizedUsers { get; set; }
 
-        public LoggedUser(Message message, string username, SaltAndPassword saltAndPassword)
+        public LoggedUser(Message message, string username, string password, string salt)
         {
             Identifier = message.From.Id;
             ChatIdentifier = message.Chat.Id;
             FirstName = message.From.FirstName;
             Username = username;
-            Password = saltAndPassword.Password;
-            Salt = saltAndPassword.Salt;
+            Password = password;
+            Salt = salt;
         }
     }
 

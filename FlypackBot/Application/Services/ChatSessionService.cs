@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using FlypackBot.Models;
+using FlypackBot.Domain.Models;
 using FlypackBot.Persistence;
 using Telegram.Bot.Types;
 
@@ -68,6 +68,7 @@ namespace FlypackBot.Application.Services
                 _sessions[session.ChatIdentifier] = session;
         }
 
-        public Task StoreAsync(CancellationToken cancellationToken = default) => _repository.UpsertAsync(_sessions.Values, cancellationToken);
+        public Task StoreAsync(CancellationToken cancellationToken = default) =>
+            _repository.UpsertAsync(_sessions.Values, cancellationToken);
     }
 }

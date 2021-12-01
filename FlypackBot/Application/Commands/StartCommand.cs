@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Application.Services;
-using FlypackBot.Models;
+using FlypackBot.Domain.Models;
 using FlypackBot.Persistence;
 using Microsoft.Extensions.Options;
 using Telegram.Bot;
@@ -32,7 +32,7 @@ namespace FlypackBot.Application.Commands
             _encrypter = encrypter;
         }
 
-        public async Task Handle(TelegramBotClient client, Message message, CancellationToken cancellationToken)
+        public async Task Handle(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
         {
             await client.SendChatActionAsync(message.Chat, ChatAction.Typing);
 
@@ -57,7 +57,7 @@ namespace FlypackBot.Application.Commands
                 cancellationToken: cancellationToken
             );
 
-            await Task.Delay(_settings.ConsecutiveMessagesInterval);
+            await Task.Delay(_settings.ConsecutiveMessagesInterval, cancellationToken);
 
             var sent = await client.SendTextMessageAsync(
                 chatId: message.Chat,
@@ -70,7 +70,7 @@ namespace FlypackBot.Application.Commands
             _session.Add(sent, message.From.Id, SessionScope.Login);
         }
 
-        public async Task Login(TelegramBotClient client, Message message, CancellationToken cancellationToken)
+        public async Task Login(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
         {
             _session.Add(message, message.From.Id, SessionScope.Login);
             var credentials = message.Text.Split(',', 2, StringSplitOptions.RemoveEmptyEntries);
@@ -109,7 +109,7 @@ namespace FlypackBot.Application.Commands
             await client.SendChatActionAsync(message.Chat, ChatAction.Typing, cancellationToken);
 
             var loggedUser = await _userRepository.GetAsync(x => x.Username == credentials[0], cancellationToken);
-            var authorizedUsers = loggedUser.AuthorizedUsers ?? new SecondaryUser[] { };
+            var authorizedUsers = loggedUser?.AuthorizedUsers ?? new SecondaryUser[] { };
             if (loggedUser != null && authorizedUsers.Count(x => x.Identifier == message.From.Id) == 0)
             {
                 await NotifyUserOfLoginAttempt(client, loggedUser, message.From, message.Chat.Id);
@@ -126,7 +126,8 @@ namespace FlypackBot.Application.Commands
                 return;
             }
 
-            var task1 = _userRepository.AddAsync(new LoggedUser(message, credentials[0], _encrypter.Encrypt(credentials[1])), cancellationToken);
+            var encrypted = _encrypter.Encrypt(credentials[1]);
+            var task1 = _userRepository.AddAsync(new LoggedUser(message, credentials[0], encrypted.Password, encrypted.Salt), cancellationToken);
             var task2 = client.SendTextMessageAsync(
                 chatId: message.Chat,
                 text: $"¡Hola {message.From.FirstName}! He podido iniciar sesión con tu usuario, ahora me mantendré monitoreando el estado de tus paquetes.",
@@ -137,9 +138,11 @@ namespace FlypackBot.Application.Commands
 
             await Task.WhenAll(task1, task2, task3);
             // fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
+
+            await _flypack.LoginAndFetchPackagesAsync(credentials[0], credentials[1]);
         }
 
-        public async Task AnswerLoginAttemptNotification(TelegramBotClient client, User user, Message message, string answer, SecondaryUser attemptingUser)
+        public async Task AnswerLoginAttemptNotification(ITelegramBotClient client, User user, Message message, string answer, SecondaryUser attemptingUser)
         {
             var tasks = new List<Task>(6);
             tasks.Add(
@@ -173,7 +176,7 @@ namespace FlypackBot.Application.Commands
             // fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
         }
 
-        private async Task NotifyUserOfLoginAttempt(TelegramBotClient client, LoggedUser user, User attemptingUser, long attemptingCbatIdentifier)
+        private async Task NotifyUserOfLoginAttempt(ITelegramBotClient client, LoggedUser user, User attemptingUser, long attemptingCbatIdentifier)
         {
             _session.Add(new SecondaryUser { ChatIdentifier = attemptingCbatIdentifier, Identifier = attemptingUser.Id, FirstName = attemptingUser.FirstName }, user.ChatIdentifier, user.Identifier, SessionScope.LoginAttempt);
             var inlineKeyboard = new InlineKeyboardMarkup(new[]

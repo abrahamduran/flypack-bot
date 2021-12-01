@@ -1,4 +1,4 @@
-﻿namespace FlypackBot.Models
+﻿namespace FlypackBot.Application.Models
 {
     public struct SaltAndPassword
     {

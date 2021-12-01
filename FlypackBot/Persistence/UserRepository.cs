@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using FlypackBot.Models;
+using FlypackBot.Domain.Models;
 using MongoDB.Driver;
 
 namespace FlypackBot.Persistence
@@ -28,7 +29,13 @@ namespace FlypackBot.Persistence
         public async Task<LoggedUser> GetAsync(Expression<Func<LoggedUser, bool>> filter, CancellationToken cancellationToken = default)
         {
             var result = await _users.FindAsync(filter, null, cancellationToken);
-            return result.SingleOrDefault();
+            return result.SingleOrDefault(cancellationToken);
+        }
+
+        public async Task<IEnumerable<LoggedUser>> GetListAsync(Expression<Func<LoggedUser, bool>> filter, CancellationToken cancellationToken = default)
+        {
+            var result = await _users.FindAsync(filter, null, cancellationToken);
+            return result.ToEnumerable(cancellationToken);
         }
 
         public async Task<bool> ExistsAsync(long identifier, CancellationToken cancellationToken = default)

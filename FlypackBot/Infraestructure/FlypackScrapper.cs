@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using FlypackBot.Models;
+using FlypackBot.Domain.Models;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
 using ScrapySharp.Extensions;
 using ScrapySharp.Network;
 
-namespace FlypackBot
+namespace FlypackBot.Infraestructure
 {
     public class FlypackScrapper
     {
@@ -41,43 +42,20 @@ namespace FlypackBot
             return nextLocation;
         }
 
-        public async Task<IEnumerable<Package>> GetPackagesAsync(string path)
+        public async Task<IEnumerable<Package>> GetPackagesAsync(string path, string username)
         {
             _logger.LogInformation("Get packages list from Flypack");
             var html = await GetHtmlAsync($"{BASE_URL}/{path}", HttpVerb.Get, null, null);
-            var rows = html.CssSelect("tbody > tr");
+            var webUsername = ParseUsernameHtml(html);
+            var packages = ParsePackagesHtml(html, webUsername ?? username);
 
-            if (!rows.Any() && !html.InnerHtml.Contains(PACKAGES_PAGE_TITLE))
-            {
-                _logger.LogWarning("Response structure seems to differ from the expected. Unable to find packages for path: {Path}", path);
-                if (html.InnerText.Contains(SESSION_EXPIRED_MESSAGE))
-                    _logger.LogWarning("Logged session has expired");
+            if (webUsername != username)
+                _logger.LogWarning("username found in web response differs from the provided username. Web's Username: {WebUsername}, Provided Username: {ProvidedUsername}", webUsername, username);
 
-                return null;
-            }
-
-            var packages = new List<Package>();
-            foreach (var row in rows)
-            {
-                var columns = row.CssSelect("td").ToArray();
-                var info = columns[1].InnerText.Replace("\r\n      ", ",").Split(',');
-                var content = columns[2].InnerHtml.Split("<br>");
-                var description = content[0].Replace("\r\n\r\n", "");
-                var deliveredDate = DateTime.ParseExact(columns[2].InnerHtml.Split("<br>")[1].TrimEnd(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                var weight = float.Parse(columns[3].InnerText);
-                var status = columns[4].CssSelect("label").ElementAt(0).InnerText;
-                var percentage = columns[4].CssSelect("div.progress-bar").ElementAt(0).InnerText.Replace("\r\n", "").Trim();
-
-                packages.Add(new Package
-                {
-                    Identifier = info[0],
-                    Tracking = info[1],
-                    Description = description,
-                    DeliveredAt = deliveredDate,
-                    Weight = weight,
-                    Status = new PackageStatus { Description = status, Percentage = percentage }
-                });
-            }
+            if (packages == null && html.InnerText.Contains(SESSION_EXPIRED_MESSAGE))
+                _logger.LogDebug("Logged session has expired");
+            else if (packages == null && !html.InnerHtml.Contains(PACKAGES_PAGE_TITLE))
+                _logger.LogCritical("Response structure seems to differ from the expected. Unable to find packages for path: {Path}", path);
 
             return packages;
         }
@@ -106,6 +84,45 @@ namespace FlypackBot
             }
 
             return builder.ToString();
+        }
+
+        private string ParseUsernameHtml(HtmlNode html)
+        {
+            var node = html.CssSelect("body > div > div.d-none.d-sm-block > h5 > strong");
+            var text = node.SingleOrDefault()?.InnerText ?? "";
+            return Regex.Match(text, @"\d+").Value;
+        }
+
+        private IEnumerable<Package> ParsePackagesHtml(HtmlNode html, string username)
+        {
+            var rows = html.CssSelect("tbody > tr");
+            if (!rows.Any()) return null;
+
+            var packages = new List<Package>();
+            foreach (var row in rows)
+            {
+                var columns = row.CssSelect("td").ToArray();
+                var info = columns[1].InnerText.Replace("\r\n      ", ",").Split(',');
+                var content = columns[2].InnerHtml.Split("<br>");
+                var description = content[0].Replace("\r\n\r\n", "");
+                var deliveredDate = DateTime.ParseExact(columns[2].InnerHtml.Split("<br>")[1].TrimEnd(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                var weight = float.Parse(columns[3].InnerText);
+                var status = columns[4].CssSelect("label").ElementAt(0).InnerText;
+                var percentage = columns[4].CssSelect("div.progress-bar").ElementAt(0).InnerText.Replace("\r\n", "").Trim();
+
+                packages.Add(new Package
+                {
+                    Identifier = info[0],
+                    Username = username,
+                    Tracking = info[1],
+                    Description = description,
+                    DeliveredAt = deliveredDate,
+                    Weight = weight,
+                    Status = new PackageStatus { Description = status, Percentage = percentage }
+                });
+            }
+
+            return packages;
         }
 
         private struct Field

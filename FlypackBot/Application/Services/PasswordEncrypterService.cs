@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using FlypackBot.Application.Extensions;
 using FlypackBot.Application.Helpers;
-using FlypackBot.Models;
+using FlypackBot.Application.Models;
 using Microsoft.Extensions.Options;
 using FlypackSettings = FlypackBot.Settings.Flypack;
 

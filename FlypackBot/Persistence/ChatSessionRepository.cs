@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FlypackBot.Models;
+using FlypackBot.Domain.Models;
 using MongoDB.Driver;
 
 namespace FlypackBot.Persistence
@@ -26,7 +26,7 @@ namespace FlypackBot.Persistence
         public async Task<IEnumerable<ChatSession>> GetAsync(CancellationToken cancellationToken = default)
         {
             var result = await _sessions.FindAsync(x => true, null, cancellationToken);
-            return result.ToEnumerable();
+            return result.ToEnumerable(cancellationToken);
         }
 
         public Task UpsertAsync(IEnumerable<ChatSession> sessions, CancellationToken cancellationToken = default)

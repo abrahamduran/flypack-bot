@@ -1,5 +1,6 @@
 using FlypackBot.Application.Commands;
 using FlypackBot.Application.Services;
+using FlypackBot.Infraestructure;
 using FlypackBot.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -37,6 +38,7 @@ namespace FlypackBot
                     services.AddSingleton<StartCommand>();
                     services.AddSingleton<PasswordEncrypterService>();
                     services.AddSingleton<PasswordDecrypterService>();
+                    services.AddSingleton<UserService>();
                     services.AddSingleton<FlypackService>();
                     services.AddSingleton<FlypackScrapper>();
                     services.AddSingleton<MongoDbContext>();
