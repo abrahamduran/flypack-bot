@@ -1,8 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using FlypackBot.Application.Helpers;
 using FlypackBot.Application.Services;
 using FlypackBot.Domain.Models;
 using FlypackBot.Persistence;
@@ -17,15 +18,20 @@ namespace FlypackBot.Application.Commands
 {
     public class StartCommand
     {
+        private readonly FlypackService _flypack;
         private readonly TelegramSettings _settings;
+        private readonly ChatSessionService _session;
         private readonly UserCacheService _userCache;
         private readonly UserRepository _userRepository;
-        private readonly FlypackService _flypack;
-        private readonly ChatSessionService _session;
+        private readonly PackageNotificationParser _parser;
         private readonly PasswordEncrypterService _encrypter;
 
-        public StartCommand(IOptions<TelegramSettings> settings, UserRepository userRepository, UserCacheService userCache, FlypackService flypackService, ChatSessionService session, PasswordEncrypterService encrypter)
+        public StartCommand(
+            IOptions<TelegramSettings> settings, UserRepository userRepository,
+            UserCacheService userCache, FlypackService flypackService, ChatSessionService session,
+            PasswordEncrypterService encrypter, PackageNotificationParser parser)
         {
+            _parser = parser;
             _settings = settings.Value;
             _userCache = userCache;
             _userRepository = userRepository;
@@ -140,11 +146,11 @@ namespace FlypackBot.Application.Commands
                 cancellationToken: cancellationToken
             );
             var task3 = _session.RemoveAsync(message.Chat.Id);
-
+            
             await Task.WhenAll(task1, task2, task3);
-            // TODO: fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
 
-            await _flypack.LoginAndFetchPackagesAsync(credentials[0], credentials[1]);
+            var packages = await _flypack.LoginAndFetchPackagesAsync(credentials[0], credentials[1]);
+            await SendPackagesToChat(client, packages, message.From.Id, cancellationToken);
         }
 
         public async Task AnswerLoginAttemptNotification(ITelegramBotClient client, User user, Message message, string answer, SecondaryUser attemptingUser, CancellationToken cancellationToken)
@@ -179,12 +185,15 @@ namespace FlypackBot.Application.Commands
 
             await Task.WhenAll(tasks);
 
-            if (answer != "permitir") return new Package[0];
+            if (answer != "permitir") return;
 
             var cachedUser = (await _userCache.GetUserAsync(user.Id, cancellationToken)).User;
             cachedUser.AuthorizedUsers = cachedUser.AuthorizedUsers ?? new List<SecondaryUser>(1);
             cachedUser.AuthorizedUsers.Add(attemptingUser);
             _userCache.AddOrUpdate(cachedUser);
+
+            var packages = await _flypack.GetCurrentPackagesAsync(user.Id, cancellationToken);
+            await SendPackagesToChat(client, packages, attemptingUser.ChatIdentifier, cancellationToken);
         }
 
         private async Task NotifyUserOfLoginAttempt(ITelegramBotClient client, LoggedUser user, User attemptingUser, long attemptingCbatIdentifier, CancellationToken cancellationToken)
@@ -208,6 +217,28 @@ namespace FlypackBot.Application.Commands
             );
 
             _session.Add(sent, user.Identifier, SessionScope.LoginAttempt);
+        }
+
+        private async Task SendPackagesToChat(ITelegramBotClient client, IEnumerable<Package> packages, long channel, CancellationToken cancellationToken)
+        {
+            var messages = _parser.SplitMessage(_parser.ParseMessageFor(packages));
+            var lastMessage = messages.Last();
+
+            foreach (var msg in messages)
+            {
+                await client.SendTextMessageAsync(
+                    chatId: channel,
+                    text: msg,
+                    parseMode: ParseMode.Markdown,
+                    cancellationToken: cancellationToken
+                );
+
+                if (msg != lastMessage)
+                {
+                    await client.SendChatActionAsync(channel, ChatAction.Typing, cancellationToken);
+                    await Task.Delay(_settings.ConsecutiveMessagesInterval, cancellationToken);
+                }
+            }
         }
     }
 }

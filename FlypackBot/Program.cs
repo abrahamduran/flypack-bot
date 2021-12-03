@@ -1,4 +1,5 @@
 using FlypackBot.Application.Commands;
+using FlypackBot.Application.Helpers;
 using FlypackBot.Application.Services;
 using FlypackBot.Infraestructure;
 using FlypackBot.Persistence;
@@ -29,11 +30,12 @@ namespace FlypackBot
                 .ConfigureServices((ctx, services) =>
                 {
                     services.AddHostedService<Worker>();
-                    services.AddSingleton<ChatSessionService>();
-                    services.AddSingleton<ChatSessionRepository>();
                     services.Configure<TelegramSettings>(ctx.Configuration.GetSection("Telegram"));
                     services.Configure<FlypackSettings>(ctx.Configuration.GetSection("Flypack"));
                     services.Configure<MongoDbSettings>(ctx.Configuration.GetSection("MongoDb"));
+                    services.AddSingleton<ChatSessionService>();
+                    services.AddSingleton<ChatSessionRepository>();
+                    services.AddSingleton<PackageNotificationParser>();
                     // TODO: migrate to scope services (eg: commands, AddScoped)
                     services.AddSingleton<StartCommand>();
                     services.AddSingleton<PasswordEncrypterService>();

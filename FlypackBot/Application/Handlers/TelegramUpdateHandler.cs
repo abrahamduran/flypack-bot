@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Application.Commands;
+using FlypackBot.Application.Helpers;
 using FlypackBot.Application.Services;
 using FlypackBot.Domain.Models;
 using Microsoft.Extensions.Logging;
@@ -24,10 +25,12 @@ namespace FlypackBot.Application.Handlers
         private readonly TelegramSettings _settings;
         private readonly ChatSessionService _session;
         private readonly StartCommand _startCommand;
+        private readonly PackageNotificationParser _parser;
         private readonly Func<Exception, CancellationToken, Task> _errorHandler;
 
-        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, StartCommand startCommand, TelegramSettings settings, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
+        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, StartCommand startCommand, TelegramSettings settings, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
         {
+            _parser = parser;
             _session = session;
             _flypack = flypack;
             _settings = settings;
@@ -111,7 +114,6 @@ namespace FlypackBot.Application.Handlers
             {
                 "/start" => _startCommand.Handle(client, message, cancellationToken),
                 "/paquetes" => Task.CompletedTask,
-                "/iniciarSesion" => Task.CompletedTask,
                 "/cerrarSession" => Task.CompletedTask,
                 _ => Task.CompletedTask
             };
@@ -138,7 +140,7 @@ namespace FlypackBot.Application.Handlers
 
             var results = packages.Where(x => x.ContainsQuery(text)).Select(x =>
             {
-                var message = ParseMessageFor(x);
+                var message = _parser.ParseMessageFor(x);
                 var content = new InputTextMessageContent(string.Join('\n', message))
                 { ParseMode = ParseMode.Markdown };
 
@@ -147,32 +149,9 @@ namespace FlypackBot.Application.Handlers
                     Description = $"{x.Status}\n{x.Weight} libras"
                 };
             })
-            //.DefaultIfEmpty(
-            //    new InlineQueryResultArticle(
-            //        "no-content-id",
-            //        "Hello Darkness, My Old Friend",
-            //        new InputTextMessageContent("I already told you there are no packages, why did you click me anyway?"))
-            //    { Description = "You currently have no pending packages", ThumbUrl = "http://cdn.onlinewebfonts.com/svg/img_460888.png" }
-            //)
             .ToList();
 
             await client.AnswerInlineQueryAsync(message.Id, results, 60, true, cancellationToken: cancellationToken);
-        }
-
-
-        private IEnumerable<string> ParseMessageFor(Package package)
-        {
-            var message = new List<string>(6);
-
-            var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
-            message.Add($"*Id*: {package.Identifier}");
-            message.Add($"*Descripción*: {description}");
-            message.Add($"*Tracking*: `{package.Tracking}`");
-            message.Add($"*Recibido*: {package.DeliveredAt:MMM dd, yyyy}");
-            message.Add($"*Peso*: {package.Weight} libras");
-            message.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " ✅" : ""));
-
-            return message;
         }
     }
 

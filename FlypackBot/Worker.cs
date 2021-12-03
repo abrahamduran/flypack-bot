@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Application.Commands;
 using FlypackBot.Application.Handlers;
+using FlypackBot.Application.Helpers;
 using FlypackBot.Application.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -21,6 +22,7 @@ namespace FlypackBot
         private readonly FlypackService _flypack;
         private readonly TelegramSettings _settings;
         private readonly TelegramBotClient _telegram;
+        private readonly PackageNotificationParser _parser;
 
         // Commands
         private readonly StartCommand _startCommand;
@@ -28,9 +30,10 @@ namespace FlypackBot
         // TODO: migrate to scope services (eg: commands)
         private readonly IServiceProvider _serviceProvider;
 
-        public Worker(FlypackService flypack, ChatSessionService session, StartCommand startCommand, IOptions<TelegramSettings> settings, ILogger<Worker> logger)
+        public Worker(FlypackService flypack, ChatSessionService session, StartCommand startCommand, PackageNotificationParser parser, IOptions<TelegramSettings> settings, ILogger<Worker> logger)
         {
             _logger = logger;
+            _parser = parser;
             _settings = settings.Value;
             _flypack = flypack;
             _session = session;
@@ -45,10 +48,10 @@ namespace FlypackBot
             //Telegram
             var allowed = new[] { UpdateType.Message,/* UpdateType.ChannelPost,*/ UpdateType.InlineQuery, UpdateType.CallbackQuery };
             var receiverOptions = new ReceiverOptions() { AllowedUpdates = allowed };
-            _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _startCommand, _settings, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
+            _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _startCommand, _settings, _parser, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
 
             // Flypack
-            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, HandleExceptionAsync, _logger), cancellationToken);
+            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, HandleExceptionAsync, _logger), cancellationToken);
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
