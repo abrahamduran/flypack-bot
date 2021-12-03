@@ -9,12 +9,12 @@ using FlypackBot.Persistence;
 
 namespace FlypackBot.Application.Services
 {
-    public class UserService
+    public class UserCacheService
     {
         private IDictionary<long, UserAndChannels> _users;
         private readonly UserRepository _repository;
 
-        public UserService(UserRepository userRepository)
+        public UserCacheService(UserRepository userRepository)
             => _repository = userRepository;
 
         public async Task<UserAndChannels> GetUserAsync(long identifier, CancellationToken cancellationToken)

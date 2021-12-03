@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,14 +18,16 @@ namespace FlypackBot.Application.Commands
     public class StartCommand
     {
         private readonly TelegramSettings _settings;
+        private readonly UserCacheService _userCache;
         private readonly UserRepository _userRepository;
         private readonly FlypackService _flypack;
         private readonly ChatSessionService _session;
         private readonly PasswordEncrypterService _encrypter;
 
-        public StartCommand(IOptions<TelegramSettings> settings, UserRepository userRepository, FlypackService flypackService, ChatSessionService session, PasswordEncrypterService encrypter)
+        public StartCommand(IOptions<TelegramSettings> settings, UserRepository userRepository, UserCacheService userCache, FlypackService flypackService, ChatSessionService session, PasswordEncrypterService encrypter)
         {
             _settings = settings.Value;
+            _userCache = userCache;
             _userRepository = userRepository;
             _flypack = flypackService;
             _session = session;
@@ -127,7 +129,10 @@ namespace FlypackBot.Application.Commands
             }
 
             var encrypted = _encrypter.Encrypt(credentials[1]);
-            var task1 = _userRepository.AddAsync(new LoggedUser(message, credentials[0], encrypted.Password, encrypted.Salt), cancellationToken);
+            var user = new LoggedUser(message, credentials[0], encrypted.Password, encrypted.Salt);
+            _userCache.AddOrUpdate(user);
+
+            var task1 = _userRepository.AddAsync(user, cancellationToken);
             var task2 = client.SendTextMessageAsync(
                 chatId: message.Chat,
                 text: $"¡Hola {message.From.FirstName}! He podido iniciar sesión con tu usuario, ahora me mantendré monitoreando el estado de tus paquetes.",
@@ -173,7 +178,13 @@ namespace FlypackBot.Application.Commands
             });
 
             await Task.WhenAll(tasks);
-            // TODO: fetch initial packages "Aquí tienes una lista con tus paquetes pendientes de entrega"
+
+            if (answer != "permitir") return new Package[0];
+
+            var cachedUser = (await _userCache.GetUserAsync(user.Id, cancellationToken)).User;
+            cachedUser.AuthorizedUsers = cachedUser.AuthorizedUsers ?? new List<SecondaryUser>(1);
+            cachedUser.AuthorizedUsers.Add(attemptingUser);
+            _userCache.AddOrUpdate(cachedUser);
         }
 
         private async Task NotifyUserOfLoginAttempt(ITelegramBotClient client, LoggedUser user, User attemptingUser, long attemptingCbatIdentifier, CancellationToken cancellationToken)

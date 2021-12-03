@@ -38,7 +38,7 @@ namespace FlypackBot
                     services.AddSingleton<StartCommand>();
                     services.AddSingleton<PasswordEncrypterService>();
                     services.AddSingleton<PasswordDecrypterService>();
-                    services.AddSingleton<UserService>();
+                    services.AddSingleton<UserCacheService>();
                     services.AddSingleton<FlypackService>();
                     services.AddSingleton<FlypackScrapper>();
                     services.AddSingleton<MongoDbContext>();

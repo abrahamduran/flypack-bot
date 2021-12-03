@@ -25,11 +25,11 @@ namespace FlypackBot.Application.Services
         private readonly FlypackScrapper _flypack;
         private readonly FlypackSettings _settings;
         private readonly PackagesRepository _repository;
-        private readonly UserService _userService;
+        private readonly UserCacheService _userService;
         private readonly PasswordDecrypterService _decrypterService;
         private readonly TimeSpan _fetchInterval;
 
-        public FlypackService(FlypackScrapper flypack, PackagesRepository repository, UserService userService, PasswordDecrypterService decrypterService, IOptions<FlypackSettings> options, ILogger<FlypackService> logger)
+        public FlypackService(FlypackScrapper flypack, PackagesRepository repository, UserCacheService userService, PasswordDecrypterService decrypterService, IOptions<FlypackSettings> options, ILogger<FlypackService> logger)
         {
             _logger = logger;
             _flypack = flypack;
