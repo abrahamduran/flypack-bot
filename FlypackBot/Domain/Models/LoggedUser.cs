@@ -21,6 +21,7 @@ namespace FlypackBot.Domain.Models
         public ICollection<SecondaryUser> AuthorizedUsers { get; set; }
         public ICollection<SecondaryUser> UnauthorizedUsers { get; set; }
 
+        public LoggedUser() { }
         public LoggedUser(Message message, string username, string password, string salt)
         {
             Identifier = message.From.Id;

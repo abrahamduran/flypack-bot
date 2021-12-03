@@ -75,8 +75,22 @@ namespace FlypackBot.Application.Services
 
         public async Task<IEnumerable<Package>> LoginAndFetchPackagesAsync(string username, string password)
         {
-            var path = await _flypack.LoginAsync(username, password);
-            return await _flypack.GetPackagesAsync(path, username);
+            try
+            {
+                var path = await _flypack.LoginAsync(username, password);
+                var packages = await _flypack.GetPackagesAsync(path, username);
+
+                if (_paths != null) _paths[username] = path;
+                if (_currentPackages != null) _currentPackages[username] = packages;
+
+                return packages;
+            }
+            catch (Exception ex)
+            {
+                LogFailedLogin(ex, new LoggedUser { Username = username });
+            }
+
+            return new Package[0];
         }
 
         public async Task<IEnumerable<Package>> GetCurrentPackagesAsync(long identifier, CancellationToken cancellationToken)
@@ -93,6 +107,8 @@ namespace FlypackBot.Application.Services
             var tasks = new List<Task>();
             foreach (var item in users)
             {
+                _channels[item.User.Username] = item.Channels;
+
                 if (_paths.ContainsKey(item.User.Username)) continue;
 
                 var task = Task.Run(async () =>
@@ -101,7 +117,6 @@ namespace FlypackBot.Application.Services
                     try
                     {
                         _paths[username] = await _flypack.LoginAsync(username, _decrypterService.Decrypt(item.User.Password, item.User.Salt));
-                        _channels[username] = item.Channels;
                     }
                     catch (Exception ex)
                     {
