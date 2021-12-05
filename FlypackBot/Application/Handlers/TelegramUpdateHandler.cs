@@ -121,8 +121,15 @@ namespace FlypackBot.Application.Handlers
         private Task OnCallbackQueryReceived(ITelegramBotClient client, CallbackQuery callbackQuery, CancellationToken cancellationToken)
         {
             var session = _session.Get(callbackQuery.Message.Chat.Id);
-            if (session != null && session.Scope != SessionScope.LoginAttempt && session.AttemptingUser == null) return Task.CompletedTask;
-            return _startCommand.AnswerLoginAttemptNotification(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, session.AttemptingUser, cancellationToken);
+            if (session == null) return Task.CompletedTask;
+
+            if (session.Scope == SessionScope.LoginAttempt && session.AttemptingUser != null)
+                return _startCommand.AnswerLoginAttemptNotification(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, session.AttemptingUser, cancellationToken);
+
+            if (session.Scope == SessionScope.Stop)
+                return _stopCommand.AnswerInlineKeyboard(client, callbackQuery.Message, callbackQuery.Data, cancellationToken);
+
+            return Task.CompletedTask;
         }
 
         private async Task OnBotInlineQuery(ITelegramBotClient client, InlineQuery message, CancellationToken cancellationToken)

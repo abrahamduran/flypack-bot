@@ -70,6 +70,9 @@ namespace FlypackBot.Persistence
             return _users.UpdateOneAsync(filter, update, null, cancellationToken);
         }
 
+        public Task DeleteAsync(long identifier, CancellationToken cancellationToken = default)
+            => _users.FindOneAndDeleteAsync(x => x.Identifier == identifier, null, cancellationToken);
+
         public Task UpdateAuthorizedUsersAsync(long identifier, SecondaryUser authorizedUser, CancellationToken cancellationToken = default)
         {
             var filter = Builders<LoggedUser>
@@ -83,6 +86,16 @@ namespace FlypackBot.Persistence
             return _users.BulkWriteAsync(new[] { new UpdateOneModel<LoggedUser>(filter, removeUser), new UpdateOneModel<LoggedUser>(filter, addUser) }, null, cancellationToken);
         }
 
+        public Task RemoveAuthorizedUserAsync(long identifier, SecondaryUser authorizedUser, CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<LoggedUser>
+                .Filter.Eq(x => x.Identifier, identifier);
+            var removeUser = Builders<LoggedUser>.Update
+                .PullFilter(x => x.AuthorizedUsers, x => x.Identifier == authorizedUser.Identifier);
+
+            return _users.UpdateOneAsync(filter, removeUser, null, cancellationToken);
+        }
+
         public Task UpdateUnauthorizedUsersAsync(long identifier, SecondaryUser unauthorizedUser, CancellationToken cancellationToken = default)
         {
             var filter = Builders<LoggedUser>
@@ -94,6 +107,16 @@ namespace FlypackBot.Persistence
                 .AddToSet(x => x.UnauthorizedUsers, unauthorizedUser);
 
             return _users.BulkWriteAsync(new[] { new UpdateOneModel<LoggedUser>(filter, removeUser), new UpdateOneModel<LoggedUser>(filter, addUser) }, null, cancellationToken);
+        }
+
+        public Task RemoveUnauthorizedUserAsync(long identifier, SecondaryUser unauthorizedUser, CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<LoggedUser>
+                .Filter.Eq(x => x.Identifier, identifier);
+            var removeUser = Builders<LoggedUser>.Update
+                .PullFilter(x => x.UnauthorizedUsers, x => x.Identifier == unauthorizedUser.Identifier);
+
+            return _users.UpdateOneAsync(filter, removeUser, null, cancellationToken);
         }
     }
 }

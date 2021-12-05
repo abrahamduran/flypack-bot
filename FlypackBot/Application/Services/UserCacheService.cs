@@ -41,6 +41,8 @@ namespace FlypackBot.Application.Services
                     .Append(user.ChatIdentifier)
             };
 
+        public void Remove(long identifier) => _users.Remove(identifier);
+
         private async Task FetchUsers(CancellationToken cancellationToken)
         {
             var users = await _repository.GetListAsync(x => true, cancellationToken);

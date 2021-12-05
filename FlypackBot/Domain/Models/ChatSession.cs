@@ -48,6 +48,6 @@ namespace FlypackBot.Domain.Models
 
     public enum SessionScope
     {
-        Login, LoginAttempt
+        Login, LoginAttempt, Stop
     }
 }

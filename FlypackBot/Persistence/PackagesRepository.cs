@@ -82,5 +82,11 @@ namespace FlypackBot.Persistence
 
             await Task.WhenAll(task1, task2);
         }
+
+        public Task DeleteByUsernameAsync(string username, CancellationToken cancellationToken = default)
+            => Task.WhenAll(
+                _packages.DeleteManyAsync(x => x.Username == username, cancellationToken),
+                _history.DeleteManyAsync(x => x.Username == username, cancellationToken)
+            );
     }
 }

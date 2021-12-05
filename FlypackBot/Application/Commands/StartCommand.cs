@@ -157,7 +157,7 @@ namespace FlypackBot.Application.Commands
         {
             var tasks = new List<Task>(6);
             tasks.Add(
-                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, $"Listo, respuesta: *{answer}*", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
+                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, $"{message.Text}\nListo, respuesta: *{answer}*", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
             );
             if (answer == "denegar")
             {

@@ -114,9 +114,11 @@ namespace FlypackBot.Application.Services
                 var task = Task.Run(async () =>
                 {
                     var username = item.User.Username;
+                    var password = item.User.Password;
+                    var salt = item.User.Salt;
                     try
                     {
-                        _paths[username] = await _flypack.LoginAsync(username, _decrypterService.Decrypt(item.User.Password, item.User.Salt));
+                        _paths[username] = await _flypack.LoginAsync(username, _decrypterService.Decrypt(password, salt));
                     }
                     catch (Exception ex)
                     {
@@ -125,6 +127,14 @@ namespace FlypackBot.Application.Services
                 }, cancellationToken);
 
                 tasks.Add(task);
+            }
+
+            var deleted = _paths.Keys.Except(users.Select(x => x.User.Username).ToList());
+            foreach (var key in deleted)
+            {
+                _paths.Remove(key);
+                _channels.Remove(key);
+                _currentPackages.Remove(key);
             }
 
             await Task.WhenAll(tasks);
