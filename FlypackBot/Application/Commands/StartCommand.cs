@@ -71,7 +71,7 @@ namespace FlypackBot.Application.Commands
                 chatId: message.Chat,
                 text: "Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_.",
                 parseMode: ParseMode.Markdown,
-                replyMarkup: new ForceReplyMarkup(),
+                replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = "usuario, contraseña" },
                 cancellationToken: cancellationToken
             );
 
@@ -88,7 +88,7 @@ namespace FlypackBot.Application.Commands
                     chatId: message.Chat,
                     text: "Por favor, mándame tu usuario y contraseña.\n\nMándalos de esta forma: *usuario, contraseña*, utilizando una coma (,) en medio de.",
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: new ForceReplyMarkup(),
+                    replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = "usuario, contraseña" },
                     cancellationToken: cancellationToken
                 );
                 _session.Add(sent, message.From.Id, SessionScope.Login);
@@ -102,7 +102,7 @@ namespace FlypackBot.Application.Commands
                     chatId: message.Chat,
                     text: "*Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_.",
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: new ForceReplyMarkup(),
+                    replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = "usuario, contraseña" },
                     cancellationToken: cancellationToken
                 );
                 _session.Add(sent, message.From.Id, SessionScope.Login);

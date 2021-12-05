@@ -32,6 +32,14 @@ namespace FlypackBot.Persistence
             return result.SingleOrDefault(cancellationToken);
         }
 
+        public async Task<LoggedUser> GetByIdentifierAsync(long identifier, CancellationToken cancellationToken = default)
+        {
+            var filterUser = Builders<LoggedUser>.Filter.Eq(x => x.Identifier, identifier);
+            var filterAuthorizedUser = Builders<LoggedUser>.Filter.Eq(x => x.AuthorizedUsers.ElementAt(-1).Identifier, identifier);
+            var result = await _users.FindAsync(filterUser | filterAuthorizedUser, null, cancellationToken);
+            return result.SingleOrDefault(cancellationToken);
+        }
+
         public async Task<IEnumerable<LoggedUser>> GetListAsync(Expression<Func<LoggedUser, bool>> filter, CancellationToken cancellationToken = default)
         {
             var result = await _users.FindAsync(filter, null, cancellationToken);
@@ -47,6 +55,20 @@ namespace FlypackBot.Persistence
 
         public Task AddAsync(LoggedUser user, CancellationToken cancellationToken = default)
             => _users.InsertOneAsync(user, null, cancellationToken);
+
+        public Task UpdateAsync(LoggedUser user, CancellationToken cancellationToken = default)
+        {
+            var filter = Builders<LoggedUser>.Filter.Eq(x => x.Identifier, user.Identifier);
+            var update = Builders<LoggedUser>.Update
+                .Set(x => x.ChatIdentifier, user.ChatIdentifier)
+                .Set(x => x.FirstName, user.FirstName)
+                .Set(x => x.Password, user.Password)
+                .Set(x => x.Salt, user.Salt)
+                .Set(x => x.AuthorizedUsers, user.AuthorizedUsers)
+                .Set(x => x.UnauthorizedUsers, user.UnauthorizedUsers);
+
+            return _users.UpdateOneAsync(filter, update, null, cancellationToken);
+        }
 
         public Task UpdateAuthorizedUsersAsync(long identifier, SecondaryUser authorizedUser, CancellationToken cancellationToken = default)
         {
