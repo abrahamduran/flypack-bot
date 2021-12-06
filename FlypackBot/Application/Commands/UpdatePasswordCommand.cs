@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Application.Services;
@@ -25,6 +25,18 @@ namespace FlypackBot.Application.Commands
 
         public async Task Handle(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
         {
+            var exists = await _userRepository.ExistsAsync(message.From.Id, cancellationToken);
+            if (!exists)
+            {
+                await client.SendTextMessageAsync(
+                    chatId: message.Chat,
+                    text: "Pero... yo ni si quiera te conozco. ಠ_ಠ",
+                    replyToMessageId: message.MessageId,
+                    cancellationToken: cancellationToken
+                );
+                return;
+            }
+
             var password = string.Join(' ', message.Text.Split(' ').Skip(1));
             if (string.IsNullOrEmpty(password))
             {

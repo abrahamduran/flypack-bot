@@ -88,7 +88,7 @@ namespace FlypackBot.Application.Handlers
 
         private async Task OnBotMessage(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Received a text message in {ChatId}, from: {UserId}", message.Chat.Id, message.From.Id);
+            _logger.LogDebug("Received a text message in {ChatId}, from: {UserId}. Message: {Message}", message.Chat.Id, message.From.Id, message.Text);
             if (message.Text?.StartsWith('/') == true)
             {
                 await client.SendChatActionAsync(message.Chat, ChatAction.Typing, cancellationToken);
@@ -122,7 +122,11 @@ namespace FlypackBot.Application.Handlers
                 "/paquetes" => _packagesCommand.Handle(client, message, cancellationToken),
                 "/cambiar_clave" => _updatePasswordCommand.Handle(client, message, cancellationToken),
                 "/stop" => _stopCommand.Handle(client, message, cancellationToken),
-                _ => Task.CompletedTask
+                _ => Task.Run(() =>
+                {
+                    _logger.LogWarning("Unrecognized command send by user {User}. Command: {Command}", message.From, command);
+                    return Task.CompletedTask;
+                })
             };
         }
 

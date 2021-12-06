@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +29,18 @@ namespace FlypackBot.Application.Commands
 
         public async Task Handle(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
         {
+            var exists = await _userRepository.ExistsAsync(message.From.Id, cancellationToken);
+            if (!exists)
+            {
+                await client.SendTextMessageAsync(
+                    chatId: message.Chat,
+                    text: "Pero... yo ni si quiera te conozco. ಠ_ಠ",
+                    replyToMessageId: message.MessageId,
+                    cancellationToken: cancellationToken
+                );
+                return;
+            }
+
             _session.Add(message, message.From.Id, SessionScope.Stop);
             var inlineKeyboard = new InlineKeyboardMarkup(new[]
             {
