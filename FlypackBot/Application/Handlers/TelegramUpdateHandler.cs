@@ -139,7 +139,7 @@ namespace FlypackBot.Application.Handlers
                 return _startCommand.AnswerLoginAttemptNotification(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, session.AttemptingUser, cancellationToken);
 
             if (session.Scope == SessionScope.Stop)
-                return _stopCommand.AnswerInlineKeyboard(client, callbackQuery.Message, callbackQuery.Data, cancellationToken);
+                return _stopCommand.AnswerInlineKeyboard(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, cancellationToken);
 
             return Task.CompletedTask;
         }

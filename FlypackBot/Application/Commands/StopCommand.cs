@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,7 +61,7 @@ namespace FlypackBot.Application.Commands
             _session.Add(sent, message.From.Id, SessionScope.Stop);
         }
 
-        public async Task AnswerInlineKeyboard(ITelegramBotClient client, Message message, string answer, CancellationToken cancellationToken)
+        public async Task AnswerInlineKeyboard(ITelegramBotClient client, User from, Message message, string answer, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>(2);
             tasks.Add(
@@ -75,10 +75,10 @@ namespace FlypackBot.Application.Commands
                 client.SendTextMessageAsync(message.Chat.Id, "A partir de este momento ya no recibirás más notificaciones sobre tus paquetes. De igual forma, la información relacionada a tu usuario ha sido eliminada.", cancellationToken: cancellationToken)
             );
 
-            var user = await _userRepository.GetByIdentifierAsync(message.From.Id, cancellationToken);
-            if (user.Identifier != message.From.Id)
+            var user = await _userRepository.GetByIdentifierAsync(from.Id, cancellationToken);
+            if (user.Identifier != from.Id)
             {
-                var authorizedUser = user.AuthorizedUsers.Single(x => x.Identifier == user.Identifier);
+                var authorizedUser = user.AuthorizedUsers.Single(x => x.Identifier == from.Id);
                 user.AuthorizedUsers.Remove(authorizedUser);
                 _userCache.AddOrUpdate(user);
                 tasks.Add(_userRepository.RemoveAuthorizedUserAsync(user.Identifier, authorizedUser, cancellationToken));
