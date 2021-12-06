@@ -17,6 +17,7 @@ namespace FlypackBot.Infraestructure
     {
         private const string BASE_URL = "https://www.flypack.one";
         private const string SESSION_EXPIRED_MESSAGE = "Session expirada, ingrese nuevamente al sistema";
+        private const string INVALID_LOGIN_MESSAGE = "index.php?ID=323&OPTIONS=LogiN&MSG=USUARIO O CLAVE INVALIDO";
         private const string PACKAGES_PAGE_TITLE = "<h2 class=\"mb-4\">Mis Paquetes</h2>";
         private readonly ILogger<FlypackScrapper> _logger;
         private readonly ScrapingBrowser _browser;
@@ -39,7 +40,7 @@ namespace FlypackBot.Infraestructure
             var html = await GetHtmlAsync($"{BASE_URL}/run.php", HttpVerb.Post, data, "application/x-www-form-urlencoded");
             var script = html?.SelectSingleNode("//script")?.InnerText;
             var nextLocation = script?.Replace("window.location='", "")?.Replace("';\r\n      ", "");
-            return nextLocation;
+            return nextLocation != INVALID_LOGIN_MESSAGE ? nextLocation : null;
         }
 
         public async Task<IEnumerable<Package>> GetPackagesAsync(string path, string username)

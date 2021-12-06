@@ -119,7 +119,11 @@ namespace FlypackBot.Application.Services
                     var salt = item.User.Salt;
                     try
                     {
-                        _paths[username] = await _flypack.LoginAsync(username, _decrypterService.Decrypt(password, salt));
+                        var path = await _flypack.LoginAsync(username, _decrypterService.Decrypt(password, salt));
+                        if (string.IsNullOrEmpty(path))
+                            LogFailedLogin(null, item.User);
+                        else
+                            _paths[username] = path;
                     }
                     catch (Exception ex)
                     {
@@ -178,7 +182,11 @@ namespace FlypackBot.Application.Services
             try
             {
                 // TODO: should we try to login again after here?
-                if (string.IsNullOrEmpty(path)) { return PackageChanges.Empty; }
+                if (string.IsNullOrEmpty(path))
+                {
+                    _paths.Remove(username);
+                    return PackageChanges.Empty;
+                }
 
                 packages = await _flypack.GetPackagesAsync(path, username);
             }
@@ -212,6 +220,8 @@ namespace FlypackBot.Application.Services
 
         private PackageChanges FilterPackages(IEnumerable<Package> packages, IEnumerable<Package> currentPackages, string username)
         {
+            if (packages is null) return PackageChanges.Empty;
+
             var updatedPackages = packages.Except(currentPackages).ToList();
             var previousPackages = currentPackages.ToList();
 
