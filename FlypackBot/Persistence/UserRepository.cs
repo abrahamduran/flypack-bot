@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -63,9 +63,13 @@ namespace FlypackBot.Persistence
                 .Set(x => x.ChatIdentifier, user.ChatIdentifier)
                 .Set(x => x.FirstName, user.FirstName)
                 .Set(x => x.Password, user.Password)
-                .Set(x => x.Salt, user.Salt)
-                .Set(x => x.AuthorizedUsers, user.AuthorizedUsers)
-                .Set(x => x.UnauthorizedUsers, user.UnauthorizedUsers);
+                .Set(x => x.Salt, user.Salt);
+
+            if (user.AuthorizedUsers != null)
+                update = update.Set(x => x.AuthorizedUsers, user.AuthorizedUsers);
+
+            if (user.UnauthorizedUsers != null)
+                update = update.Set(x => x.UnauthorizedUsers, user.UnauthorizedUsers);
 
             return _users.UpdateOneAsync(filter, update, null, cancellationToken);
         }
