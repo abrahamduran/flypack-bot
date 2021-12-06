@@ -70,7 +70,7 @@ namespace FlypackBot.Application.Helpers
             var message = new List<string>(includesDeliveryDate ? 6 : 5);
 
             var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
-            message.Add($"*Id*: {package.Identifier}");
+            message.Add($"*ID*: {package.Identifier}");
             message.Add($"*Descripción*: {description}");
             message.Add($"*Tracking*: `{package.Tracking}`");
 
