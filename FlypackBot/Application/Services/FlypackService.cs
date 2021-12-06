@@ -81,7 +81,8 @@ namespace FlypackBot.Application.Services
                 var packages = await _flypack.GetPackagesAsync(path, username);
 
                 if (_paths != null) _paths[username] = path;
-                if (_currentPackages != null) _currentPackages[username] = packages;
+                // TODO: if there are differences, might be a good idea to update the cache and notify the other users about the changes.
+                //if (_currentPackages != null) _currentPackages[username] = packages;
 
                 return packages;
             }

@@ -11,7 +11,7 @@ namespace FlypackBot.Application.Services
 {
     public class UserCacheService
     {
-        private IDictionary<long, UserAndChannels> _users;
+        private IDictionary<long, UserAndChannels> _users = new Dictionary<long, UserAndChannels>();
         private readonly UserRepository _repository;
 
         public UserCacheService(UserRepository userRepository)
@@ -22,7 +22,11 @@ namespace FlypackBot.Application.Services
             if (_users == null || !_users.Any())
                 await FetchUsers(cancellationToken);
 
-            return _users.ContainsKey(identifier) ? _users[identifier] : UserAndChannels.Empty;
+            var secondaryUser = _users.SingleOrDefault(x => x.Value.User.AuthorizedUsers?.Any(a => a.Identifier == identifier) ?? false).Value;
+
+            return _users.ContainsKey(identifier)
+                ? _users[identifier]
+                : secondaryUser;
         }
 
         public async Task<IEnumerable<UserAndChannels>> GetUsersAsync(CancellationToken cancellationToken)

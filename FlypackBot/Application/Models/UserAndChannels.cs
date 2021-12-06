@@ -8,11 +8,5 @@ namespace FlypackBot.Application.Models
     {
         public LoggedUser User { get; set; }
         public IEnumerable<long> Channels { get; set; }
-
-        public static UserAndChannels Empty => new UserAndChannels
-        {
-            User = null,
-            Channels = null
-        };
     }
 }
