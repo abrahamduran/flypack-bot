@@ -80,6 +80,12 @@ namespace FlypackBot.Application.Commands
 
             _userCache.AddOrUpdate(user);
             await _userRepository.UpdateAsync(user, cancellationToken);
+            await client.SendTextMessageAsync(
+                chatId: message.Chat,
+                text: "La nueva contraseña ha sido actualizada. 🎉",
+                replyToMessageId: message.MessageId,
+                cancellationToken: cancellationToken
+            );
         }
     }
 }
