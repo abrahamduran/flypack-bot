@@ -43,6 +43,7 @@ namespace FlypackBot.Application.Services
                 User = user,
                 Channels = (user.AuthorizedUsers?.Select(a => a.ChatIdentifier) ?? new List<long>(1))
                     .Append(user.ChatIdentifier)
+                    .ToList()
             };
 
         public void Remove(long identifier) => _users.Remove(identifier);
@@ -59,6 +60,7 @@ namespace FlypackBot.Application.Services
                     User = x,
                     Channels = (x.AuthorizedUsers?.Select(a => a.ChatIdentifier) ?? new List<long>(1))
                         .Append(x.ChatIdentifier)
+                        .ToList()
                 }
             );
         }
