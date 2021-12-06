@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,19 +22,28 @@ namespace FlypackBot.Application.Handlers
         private readonly FlypackService _flypack;
         private readonly TelegramSettings _settings;
         private readonly ChatSessionService _session;
-        private readonly StartCommand _startCommand;
         private readonly PackageNotificationParser _parser;
         private readonly Func<Exception, CancellationToken, Task> _errorHandler;
 
-        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, StartCommand startCommand, TelegramSettings settings, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
+        // Commands
+        private readonly StartCommand _startCommand;
+        private readonly StopCommand _stopCommand;
+        private readonly PackagesCommand _packagesCommand;
+        private readonly UpdatePasswordCommand _updatePasswordCommand;
+
+        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, TelegramSettings settings, StartCommand startCommand, StopCommand stopCommand, PackagesCommand packagesCommand, UpdatePasswordCommand updatePasswordCommand, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
         {
             _parser = parser;
             _session = session;
             _flypack = flypack;
             _settings = settings;
-            _startCommand = startCommand;
             _errorHandler = errorHandler;
             _logger = logger;
+
+            _stopCommand = stopCommand;
+            _startCommand = startCommand;
+            _packagesCommand = packagesCommand;
+            _updatePasswordCommand = updatePasswordCommand;
         }
 
         public Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
@@ -112,8 +119,9 @@ namespace FlypackBot.Application.Handlers
             return command switch
             {
                 "/start" => _startCommand.Handle(client, message, cancellationToken),
-                "/paquetes" => Task.CompletedTask,
-                "/cambiar_clave" => Task.CompletedTask,
+                "/paquetes" => _packagesCommand.Handle(client, message, cancellationToken),
+                "/cambiar_clave" => _updatePasswordCommand.Handle(client, message, cancellationToken),
+                "/stop" => _stopCommand.Handle(client, message, cancellationToken),
                 _ => Task.CompletedTask
             };
         }

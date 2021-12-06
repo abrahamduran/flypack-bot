@@ -38,6 +38,9 @@ namespace FlypackBot
                     services.AddSingleton<PackageNotificationParser>();
                     // TODO: migrate to scope services (eg: commands, AddScoped)
                     services.AddSingleton<StartCommand>();
+                    services.AddSingleton<StopCommand>();
+                    services.AddSingleton<PackagesCommand>();
+                    services.AddSingleton<UpdatePasswordCommand>();
                     services.AddSingleton<PasswordEncrypterService>();
                     services.AddSingleton<PasswordDecrypterService>();
                     services.AddSingleton<UserCacheService>();

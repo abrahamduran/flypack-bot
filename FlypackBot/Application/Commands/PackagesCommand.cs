@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FlypackBot.Application.Helpers;
 using FlypackBot.Application.Services;
 using FlypackBot.Domain.Models;
+using Microsoft.Extensions.Options;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -20,13 +21,13 @@ namespace FlypackBot.Application.Commands
         private readonly PackageNotificationParser _parser;
         private readonly PasswordDecrypterService _decrypter;
 
-        public PackagesCommand(FlypackService flypack, UserCacheService userCache, PasswordDecrypterService decrypter, PackageNotificationParser parser, TelegramSettings settings)
+        public PackagesCommand(FlypackService flypack, UserCacheService userCache, PasswordDecrypterService decrypter, PackageNotificationParser parser, IOptions<TelegramSettings> settings)
         {
             _flypack = flypack;
             _parser = parser;
             _decrypter = decrypter;
             _userCache = userCache;
-            _settings = settings;
+            _settings = settings.Value;
         }
 
         public async Task Handle(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
