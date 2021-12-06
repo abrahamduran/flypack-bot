@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -35,7 +35,7 @@ namespace FlypackBot.Persistence
         public async Task<LoggedUser> GetByIdentifierAsync(long identifier, CancellationToken cancellationToken = default)
         {
             var filterUser = Builders<LoggedUser>.Filter.Eq(x => x.Identifier, identifier);
-            var filterAuthorizedUser = Builders<LoggedUser>.Filter.Eq(x => x.AuthorizedUsers.ElementAt(-1).Identifier, identifier);
+            var filterAuthorizedUser = Builders<LoggedUser>.Filter.ElemMatch(x => x.AuthorizedUsers, x => x.Identifier == identifier);
             var result = await _users.FindAsync(filterUser | filterAuthorizedUser, null, cancellationToken);
             return result.SingleOrDefault(cancellationToken);
         }
@@ -48,8 +48,8 @@ namespace FlypackBot.Persistence
 
         public async Task<bool> ExistsAsync(long identifier, CancellationToken cancellationToken = default)
         {
-            var count = await _users.CountDocumentsAsync(x => x.Identifier == identifier, null, cancellationToken)
-                + await _users.CountDocumentsAsync(Builders<LoggedUser>.Filter.ElemMatch(x => x.AuthorizedUsers, x => x.Identifier == identifier));
+            var builder = Builders<LoggedUser>.Filter;
+            var count = await _users.CountDocumentsAsync(builder.Eq(x => x.Identifier, identifier) | builder.ElemMatch(x => x.AuthorizedUsers, x => x.Identifier == identifier), null, cancellationToken);
             return count == 1;
         }
 
