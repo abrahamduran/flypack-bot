@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Application.Services;
@@ -42,7 +42,7 @@ namespace FlypackBot.Application.Commands
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Tu nueva contraseña no puede ser un mensaje en blanco.",
+                    text: "Tu nueva contraseña no puede ser un mensaje en blanco. 😑",
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
@@ -50,13 +50,14 @@ namespace FlypackBot.Application.Commands
             }
 
             var user = await _userRepository.GetByIdentifierAsync(message.From.Id, cancellationToken);
+            // TODO: investigate false positive
             var result = await _flypack.TestCredentialsAsync(user.Username, password);
 
             if (!result)
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "La nueva contraseña parece ser incorrecta.",
+                    text: "La nueva contraseña parece ser incorrecta. 🥴",
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
