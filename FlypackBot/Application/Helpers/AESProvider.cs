@@ -8,14 +8,12 @@ namespace FlypackBot.Application.Helpers
         private const int BLOCK_SIZE = 128;
         private const int ITERATIONS = 12000;
 
-        internal static RijndaelManaged GetProvider(byte[] password, byte[] salt)
+        internal static Aes GetProvider(byte[] password, byte[] salt)
         {
-            var aes = new RijndaelManaged
-            {
-                KeySize = KEY_SIZE,
-                BlockSize = BLOCK_SIZE
-            };
-            
+            var aes = Aes.Create();
+            aes.KeySize = KEY_SIZE;
+            aes.BlockSize = BLOCK_SIZE;
+
             var key = new Rfc2898DeriveBytes(password, salt, ITERATIONS);
             aes.Key = key.GetBytes(aes.KeySize / 8);
             aes.IV = key.GetBytes(aes.BlockSize / 8);

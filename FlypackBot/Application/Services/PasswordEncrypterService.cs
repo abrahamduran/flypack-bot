@@ -48,7 +48,7 @@ namespace FlypackBot.Application.Services
         private static byte[] GenerateRandomSalt()
         {
             var salt = new byte[16];
-            using (var provider = new RNGCryptoServiceProvider())
+            using (var provider = RandomNumberGenerator.Create())
                 provider.GetBytes(salt);
 
             return salt;

@@ -25,7 +25,7 @@ namespace FlypackBot.Application.Helpers
         private static byte[] GeneratePrivateKey()
         {
             var key = new byte[KEY_SIZE];
-            using (var provider = new RNGCryptoServiceProvider())
+            using (var provider = RandomNumberGenerator.Create())
                 provider.GetBytes(key);
 
             return key;
