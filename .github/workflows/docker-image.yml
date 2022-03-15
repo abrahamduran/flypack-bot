@@ -42,7 +42,7 @@ jobs:
           tags: |
             type=schedule
             type=ref,event=branch
-            type=ref,suffix=-{{branch}},event=pr
+            type=ref,suffix=-{{base_ref}},event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
