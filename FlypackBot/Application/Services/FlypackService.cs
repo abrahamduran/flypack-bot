@@ -112,25 +112,7 @@ namespace FlypackBot.Application.Services
 
                 if (_paths.ContainsKey(item.User.Username)) continue;
 
-                var task = Task.Run(async () =>
-                {
-                    var username = item.User.Username;
-                    var password = item.User.Password;
-                    var salt = item.User.Salt;
-                    try
-                    {
-                        var path = await _flypack.LoginAsync(username, _decrypterService.Decrypt(password, salt));
-                        if (string.IsNullOrEmpty(path))
-                            LogFailedLogin(null, item.User);
-                        else
-                            _paths[username] = path;
-                    }
-                    catch (Exception ex)
-                    {
-                        LogFailedLogin(ex, item.User);
-                    }
-                }, cancellationToken);
-
+                var task = UpdateUserPathAndChannels(item, cancellationToken);
                 tasks.Add(task);
             }
 
@@ -145,9 +127,33 @@ namespace FlypackBot.Application.Services
             await Task.WhenAll(tasks);
         }
 
-        private Task FetchUsersPackages(
-            Func<PackageUpdate, CancellationToken, Task> updateHandler,
-            CancellationToken cancellationToken)
+        private Task UpdateUserPathAndChannels(UserAndChannels user, CancellationToken cancellationToken)
+        {
+            _channels[user.User.Username] = user.Channels;
+
+            if (_paths.ContainsKey(user.User.Username)) return Task.CompletedTask;
+
+            return Task.Run(async () =>
+            {
+                var username = user.User.Username;
+                var password = user.User.Password;
+                var salt = user.User.Salt;
+                try
+                {
+                    var path = await _flypack.LoginAsync(username, _decrypterService.Decrypt(password, salt));
+                    if (string.IsNullOrEmpty(path))
+                        LogFailedLogin(null, user.User);
+                    else
+                        _paths[username] = path;
+                }
+                catch (Exception ex)
+                {
+                    LogFailedLogin(ex, user.User);
+                }
+            }, cancellationToken);
+        }
+        
+        private Task FetchUsersPackages(Func<PackageUpdate, CancellationToken, Task> updateHandler, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
             foreach (var path in _paths)
@@ -155,7 +161,7 @@ namespace FlypackBot.Application.Services
                 tasks.Add(
                     Task.Run(async () =>
                     {
-                        var packages = await FetchUserPackages(path.Value, path.Key, cancellationToken);
+                        var packages = await FetchUserPackages(path.Value, path.Key);
                         var t1 = StoreChanges(packages, cancellationToken);
                         var t2 = Task.CompletedTask;
                         if (packages.Updates.Any())
@@ -175,22 +181,22 @@ namespace FlypackBot.Application.Services
             return Task.WhenAll(tasks);
         }
 
-        private async Task<PackageChanges> FetchUserPackages(string path, string username, CancellationToken cancellationToken)
+        private async Task<PackageChanges> FetchUserPackages(string path, string username)
         {
             _logger.LogDebug("Executing fetch");
             IEnumerable<Package> packages;
             try
             {
+                packages = await _flypack.GetPackagesAsync(path, username);
+
                 // TODO: should we try to login again after here?
-                if (string.IsNullOrEmpty(path))
+                if (packages == null)
                 {
                     _paths.Remove(username);
                     return PackageChanges.Empty;
                 }
-
-                packages = await _flypack.GetPackagesAsync(path, username);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _paths.Remove(username);
                 LogFailedPackagesFetch(ex, path);
