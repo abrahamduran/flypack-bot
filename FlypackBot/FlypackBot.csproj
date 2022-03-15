@@ -1,19 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>dotnet-FlypackBot-2A12084F-422E-49B4-99FD-A897A528A111</UserSecretsId>
     <DockerComposeProjectPath>../docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="5.0.0" />
-    <PackageReference Include="Telegram.Bot" Version="16.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Telegram.Bot" Version="17.0.0" />
     <PackageReference Include="ScrapySharp" Version="3.0.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.13.2" />
-    <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="0.2.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.15.0" />
+    <PackageReference Include="Telegram.Bot.Extensions.Polling" Version="1.0.2" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Persistence\" />
+    <Folder Include="Application\" />
+    <Folder Include="Application\Commands\" />
+    <Folder Include="Application\Services\" />
+    <Folder Include="Application\Helpers\" />
+    <Folder Include="Application\Extensions\" />
+    <Folder Include="Infraestructure\" />
+    <Folder Include="Domain\Models\" />
+    <Folder Include="Application\Models\" />
+    <Folder Include="Application\Handlers\" />
   </ItemGroup>
 </Project>

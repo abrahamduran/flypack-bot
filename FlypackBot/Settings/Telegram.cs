@@ -1,5 +1,4 @@
-﻿using System;
-namespace FlypackBot.Settings
+﻿namespace FlypackBot.Settings
 {
     public class Telegram
     {
@@ -8,5 +7,6 @@ namespace FlypackBot.Settings
         public long ChannelIdentifier { get; set; }
         public int MaxMessageLength { get; set; }
         public int MaxMessageEntities { get; set; }
+        public int ConsecutiveMessagesInterval { get; set; }
     }
 }

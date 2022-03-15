@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace FlypackBot.Models
+namespace FlypackBot.Domain.Models
 {
     public class PackageHistory
     {
@@ -12,6 +12,7 @@ namespace FlypackBot.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string MongoId { get; set; }
         public string Identifier { get; set; }
+        public string Username { get; set; }
         public string Tracking { get; set; }
         public IEnumerable<PackageChange> Changes { get; set; }
     }

@@ -1,10 +1,8 @@
-﻿using System;
-namespace FlypackBot.Settings
+﻿namespace FlypackBot.Settings
 {
     public class Flypack
     {
-        public string Username { get; set; }
-        public string Password { get; set; }
+        public string PrivateKey { get; set; }
         public int FetchInterval { get; set; }
     }
 }

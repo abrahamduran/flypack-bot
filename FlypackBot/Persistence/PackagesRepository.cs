@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FlypackBot.Models;
+using FlypackBot.Domain.Models;
 using MongoDB.Driver;
 
 namespace FlypackBot.Persistence
@@ -23,27 +23,29 @@ namespace FlypackBot.Persistence
             #region Create Indices
             _history.CreateUniqueIndex(x => x.Identifier);
             _history.CreateUniqueIndex(x => x.Tracking);
+            _history.CreateIndex(x => x.Username);
             _packages.CreateUniqueIndex(x => x.Identifier);
             _packages.CreateUniqueIndex(x => x.Tracking);
+            _packages.CreateIndex(x => x.Username);
             _packages.CreateIndex(x => x.Status.Description);
             _packages.CreateIndex(x => x.Status.Percentage);
             #endregion
         }
 
-        public async Task<Package> GetAsync(string id, CancellationToken token = default)
-            => (await _packages.FindAsync(x => x.MongoId == id || x.Identifier == id || x.Tracking == id, null, token))
-                .SingleOrDefault();
+        public async Task<Package> GetAsync(string id, CancellationToken cancellationToken = default)
+            => (await _packages.FindAsync(x => x.MongoId == id || x.Identifier == id || x.Tracking == id, null, cancellationToken))
+                .SingleOrDefault(cancellationToken);
 
-        public async Task<IList<Package>> GetPendingAsync(CancellationToken token = default)
+        public async Task<List<Package>> GetPendingAsync(CancellationToken cancellationToken = default)
         {
             var sort = new FindOptions<Package, Package>();
             sort.Sort = Builders<Package>.Sort.Ascending(x => x.DeliveredAt);
 
-            var result = await _packages.FindAsync(x => x.Status.Description != PackageStatus.Delivered.Description, sort, token);
-            return result.ToList();
+            var result = await _packages.FindAsync(x => x.Status.Description != PackageStatus.Delivered.Description, sort, cancellationToken);
+            return result.ToList(cancellationToken);
         }
 
-        public async Task UpsertAsync(IEnumerable<Package> packages, CancellationToken token = default)
+        public async Task UpsertAsync(IEnumerable<Package> packages, CancellationToken cancellationToken = default)
         {
             var updatedAt = DateTime.Now;
             var replacements = packages.Select(x =>
@@ -52,6 +54,7 @@ namespace FlypackBot.Persistence
                 var filter = Builders<Package>.Filter.Eq(x => x.Identifier, x.Identifier);
                 var update = Builders<Package>.Update
                     .Set(s => s.Identifier, x.Identifier)
+                    .Set(s => s.Username, x.Username)
                     .Set(s => s.Tracking, x.Tracking)
                     .Set(s => s.Description, x.Description)
                     .Set(s => s.Weight, x.Weight)
@@ -67,14 +70,23 @@ namespace FlypackBot.Persistence
                 var filter = Builders<PackageHistory>.Filter.Eq(x => x.Identifier, x.Identifier);
                 var update = Builders<PackageHistory>.Update
                     .Set(s => s.Identifier, x.Identifier)
+                    .Set(s => s.Username, x.Username)
                     .Set(s => s.Tracking, x.Tracking)
                     .AddToSet(u => u.Changes, change);
 
                 return new UpdateOneModel<PackageHistory>(filter, update) { IsUpsert = true };
             }).ToList();
 
-            await _packages.BulkWriteAsync(replacements, null, token);
-            await _history.BulkWriteAsync(updates, null, token);
+            var task1 = _packages.BulkWriteAsync(replacements, null, cancellationToken);
+            var task2 = _history.BulkWriteAsync(updates, null, cancellationToken);
+
+            await Task.WhenAll(task1, task2);
         }
+
+        public Task DeleteByUsernameAsync(string username, CancellationToken cancellationToken = default)
+            => Task.WhenAll(
+                _packages.DeleteManyAsync(x => x.Username == username, cancellationToken),
+                _history.DeleteManyAsync(x => x.Username == username, cancellationToken)
+            );
     }
 }

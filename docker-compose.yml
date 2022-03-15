@@ -10,13 +10,14 @@ services:
     environment:
       - TZ=${TIMEZONE}
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
-      - Flypack__Username=${FLYPACK_USERNAME}
-      - Flypack__Password=${FLYPACK_PASSWORD}
+      - Flypack__PrivateKey=${FLYPACK_PRIVATE_KEY}
+      - Flypack__FetchInterval=${FLYPACK_FETCH_INTERVAL}
       - Telegram__AccessToken=${TELEGRAM_ACCESS_TOKEN}
       - Telegram__AuthorizedUsers__0=${TELEGRAM_AUTHORIZED_USERS_0}
       - Telegram__ChannelIdentifier=${TELEGRAM_CHANNEL_IDENTIFIER}
       - Telegram__MaxMessageLength=${TELEGRAM_MAXIMUM_MESSAGE_LENGTH}
       - Telegram__MaxMessageEntities=${TELEGRAM_MAXIMUM_MESSAGE_ENTITIES}
+      - Telegram__ConsecutiveMessageInterval=${TELEGRAM_CONSECUTIVE_MESSAGES_INTERVAL}
       - MongoDb__DatabaseName=${MONGO_INITDB_DATABASE}
       - MongoDb__ConnectionString=${MONGO_CONNECTION_STRING}
 

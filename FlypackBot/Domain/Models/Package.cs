@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace FlypackBot.Models
+namespace FlypackBot.Domain.Models
 {
     public class Package : IEquatable<Package>
     {
@@ -12,6 +12,7 @@ namespace FlypackBot.Models
         [BsonRepresentation(BsonType.ObjectId)]
         public string MongoId { get; set; }
         public string Identifier { get; set; }
+        public string Username { get; set; }
         public string Tracking { get; set; }
         public string Description { get; set; }
         public float Weight { get; set; }
@@ -36,6 +37,7 @@ namespace FlypackBot.Models
             Description.GetHashCode() ^
             Identifier.GetHashCode() ^
             Tracking.GetHashCode() ^
+            Username.GetHashCode() ^
             Status.GetHashCode() ^
             Weight.GetHashCode();
 
