@@ -107,9 +107,20 @@ namespace FlypackBot.Infraestructure
                 var content = columns[2].InnerHtml.Split("<br>");
                 var description = content[0].Replace("\r\n\r\n", "");
                 var deliveredDate = DateTime.ParseExact(columns[2].InnerHtml.Split("<br>")[1].TrimEnd(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
-                var weight = float.Parse(columns[3].InnerText);
-                var status = columns[4].CssSelect("label").ElementAt(0).InnerText;
-                var percentage = columns[4].CssSelect("div.progress-bar").ElementAt(0).InnerText.Replace("\r\n", "").Trim();
+
+                // Flypack made a change to the UI which misplaced weight values
+                float weight;
+                var parsed = float.TryParse(columns[3].InnerText, out weight);
+                if (parsed == false)
+                    float.TryParse(columns[4].InnerText, out weight);
+
+                // Flypack made a change to the UI which pushed the status to the next column
+                var statusCell = columns[4].CssSelect("label");
+                statusCell = statusCell.Any() ? statusCell : columns[5].CssSelect("label");
+                var status = statusCell.ElementAt(0).InnerText;
+                var percentageCell = columns[4].CssSelect("div.progress-bar");
+                percentageCell = percentageCell.Any() ? percentageCell : columns[5].CssSelect("div.progress-bar");
+                var percentage = percentageCell.ElementAt(0).InnerText.Replace("\r\n", "").Trim();
 
                 packages.Add(new Package
                 {
