@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -166,7 +167,7 @@ namespace FlypackBot.Application.Handlers
 
                 return new InlineQueryResultArticle(x.Identifier, x.Description, content)
                 {
-                    Description = $"{x.Status}\n{x.Weight} libras"
+                    Description = $"{x.Status}\n{x.Weight} {L10n.strings.PoundsText}"
                 };
             })
             .ToList();
