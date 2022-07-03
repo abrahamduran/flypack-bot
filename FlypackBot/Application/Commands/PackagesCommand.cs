@@ -37,7 +37,7 @@ namespace FlypackBot.Application.Commands
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Pero... yo ni si quiera te conozco. ಠ_ಠ",
+                    text: L10n.strings.DontKnowYouMessage,
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
