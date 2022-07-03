@@ -19,6 +19,7 @@ namespace FlypackBot
     {
         private readonly ILogger<Worker> _logger;
         private readonly ChatSessionService _session;
+        private readonly UserCacheService _userCache;
         private readonly FlypackService _flypack;
         private readonly TelegramSettings _settings;
         private readonly TelegramBotClient _telegram;
@@ -61,15 +62,16 @@ namespace FlypackBot
             //Telegram
             var allowed = new[] { UpdateType.Message,/* UpdateType.ChannelPost,*/ UpdateType.InlineQuery, UpdateType.CallbackQuery };
             var receiverOptions = new ReceiverOptions() { AllowedUpdates = allowed };
-            _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _settings, _startCommand, _stopCommand, _packagesCommand, _updatePasswordCommand, _parser, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
+            _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _userCache, _settings, _startCommand, _stopCommand, _packagesCommand, _updatePasswordCommand, _parser, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
 
             // Flypack
-            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, HandleExceptionAsync, _logger), cancellationToken);
+            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, _userCache, HandleExceptionAsync, _logger), cancellationToken);
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Gracefully stopped this mf");
+            await _userCache.StoreAsync(cancellationToken);
             await _session.StoreAsync(cancellationToken);
             await base.StopAsync(cancellationToken);
         }

@@ -23,6 +23,7 @@ namespace FlypackBot.Application.Handlers
         private readonly FlypackService _flypack;
         private readonly TelegramSettings _settings;
         private readonly ChatSessionService _session;
+        private readonly UserLanguageUpdater _updater;
         private readonly PackageNotificationParser _parser;
         private readonly Func<Exception, CancellationToken, Task> _errorHandler;
 
@@ -32,11 +33,12 @@ namespace FlypackBot.Application.Handlers
         private readonly PackagesCommand _packagesCommand;
         private readonly UpdatePasswordCommand _updatePasswordCommand;
 
-        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, TelegramSettings settings, StartCommand startCommand, StopCommand stopCommand, PackagesCommand packagesCommand, UpdatePasswordCommand updatePasswordCommand, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
+        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, UserLanguageUpdater updater, TelegramSettings settings, StartCommand startCommand, StopCommand stopCommand, PackagesCommand packagesCommand, UpdatePasswordCommand updatePasswordCommand, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
         {
             _parser = parser;
             _session = session;
             _flypack = flypack;
+            _updater = updater;
             _settings = settings;
             _errorHandler = errorHandler;
             _logger = logger;
@@ -76,7 +78,11 @@ namespace FlypackBot.Application.Handlers
                 {
                     try
                     {
-                        await handler;
+                        await Task.WhenAll(new[]
+                        {
+                            handler,
+                            _updater.UpdateIfNeededAsync(user.Id, user.LanguageCode, cancellationToken)
+                        });
                     }
                     catch (Exception exception)
                     {

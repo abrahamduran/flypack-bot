@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using FlypackBot.Domain.Models;
 
 namespace FlypackBot.Application.Models

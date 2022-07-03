@@ -74,6 +74,22 @@ namespace FlypackBot.Persistence
             return _users.UpdateOneAsync(filter, update, null, cancellationToken);
         }
 
+        public Task UpdateAsync(IEnumerable<LoggedUser> users, CancellationToken cancellationToken = default)
+        {
+            var updates = users.Select(x =>
+            {
+                var filter = Builders<LoggedUser>.Filter.Eq(f => f.Identifier, x.Identifier);
+                var update = Builders<LoggedUser>.Update
+                    .Set(s => s.ChatIdentifier, x.ChatIdentifier)
+                    .Set(s => s.FirstName, x.FirstName)
+                    .Set(s => s.Password, x.Password)
+                    .Set(s => s.Salt, x.Salt);
+                return new UpdateOneModel<LoggedUser>(filter, update);
+            }).ToList();
+
+            return _users.BulkWriteAsync(updates, null, cancellationToken);
+        }
+
         public Task DeleteAsync(long identifier, CancellationToken cancellationToken = default)
             => _users.FindOneAndDeleteAsync(x => x.Identifier == identifier, null, cancellationToken);
 

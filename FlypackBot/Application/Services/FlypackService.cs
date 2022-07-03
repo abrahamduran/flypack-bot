@@ -55,7 +55,8 @@ namespace FlypackBot.Application.Services
 
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        var users = await _userService.GetUsersAsync(cancellationToken);
+                        // TODO: Each call to ParseMessageFor needs to be localized for each user
+                        var users = await _userService.GetLoggedUsersAsync(cancellationToken);
                         if (users == null) continue;
 
                         await UpdateUsersPathsAndChannels(users, cancellationToken);
@@ -96,11 +97,10 @@ namespace FlypackBot.Application.Services
 
         public async Task<IEnumerable<Package>> GetCurrentPackagesAsync(long identifier, CancellationToken cancellationToken)
         {
-            var user = await _userService.GetUserAsync(identifier, cancellationToken);
-            if (user.User == null) return null;
-            var username = user.User.Username;
+            var user = await _userService.GetLoggedUserAsync(identifier, cancellationToken);
+            if (user == null) return null;
 
-            return _currentPackages.ContainsKey(username) ? _currentPackages[username] : new Package[0];
+            return _currentPackages.ContainsKey(user.Username) ? _currentPackages[user.Username] : new Package[0];
         }
 
         private async Task UpdateUsersPathsAndChannels(IEnumerable<UserAndChannels> users, CancellationToken cancellationToken)
@@ -108,10 +108,6 @@ namespace FlypackBot.Application.Services
             var tasks = new List<Task>();
             foreach (var item in users)
             {
-                _channels[item.User.Username] = item.Channels;
-
-                if (_paths.ContainsKey(item.User.Username)) continue;
-
                 var task = UpdateUserPathAndChannels(item, cancellationToken);
                 tasks.Add(task);
             }
