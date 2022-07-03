@@ -49,16 +49,8 @@ namespace FlypackBot.Application.Handlers
 
         public Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
         {
-            var userId = update.Message?.From.Id ?? update.InlineQuery?.From.Id ?? update.CallbackQuery.From?.Id;
-            var channelId = update.ChannelPost?.Chat.Id;
-            var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
-            if (update.ChannelPost != null && isUnauthorizedChannel)
-            {
-                var username = update.Message?.From.Username ?? update.InlineQuery?.From.Username;
-                var channelName = update.ChannelPost?.Chat.Title;
-                _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}, channel: {ChannelId}: {ChannelName}", userId, username, channelId, channelName);
-                return Task.CompletedTask;
-            }
+            var user = update.Message?.From ?? update.InlineQuery?.From ?? update.CallbackQuery?.From ?? update.ChannelPost?.From;
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(user?.LanguageCode ?? "en");
 
             var handler = update.Type switch
             {
@@ -71,13 +63,25 @@ namespace FlypackBot.Application.Handlers
 
             Task.Run(async () =>
             {
-                try
+                var userId = user?.Id ?? 0L;
+                var channelId = update.ChannelPost?.Chat.Id;
+                var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
+                if (update.ChannelPost != null && isUnauthorizedChannel)
                 {
-                    await handler;
+                    var username = user?.Username ?? "null";
+                    var channelName = update.ChannelPost?.Chat.Title;
+                    _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}, channel: {ChannelId}: {ChannelName}", userId, username, channelId, channelName);
                 }
-                catch (Exception exception)
+                else
                 {
-                    await HandleErrorAsync(client, exception, cancellationToken);
+                    try
+                    {
+                        await handler;
+                    }
+                    catch (Exception exception)
+                    {
+                        await HandleErrorAsync(client, exception, cancellationToken);
+                    }
                 }
             }, cancellationToken);
 
