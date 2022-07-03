@@ -165,7 +165,7 @@ namespace FlypackBot.Application.Handlers
 
             if (packages == null)
             {
-                await client.AnswerInlineQueryAsync(message.Id, new InlineQueryResultArticle[0], cancellationToken: cancellationToken);
+                await client.AnswerInlineQueryAsync(message.Id, Array.Empty<InlineQueryResultArticle>(), cancellationToken: cancellationToken);
                 return;
             }
 

@@ -92,7 +92,7 @@ namespace FlypackBot.Application.Services
                 LogFailedLogin(ex, new LoggedUser { Username = username });
             }
 
-            return new Package[0];
+            return Array.Empty<Package>();
         }
 
         public async Task<IEnumerable<Package>> GetCurrentPackagesAsync(long identifier, CancellationToken cancellationToken)
@@ -100,7 +100,7 @@ namespace FlypackBot.Application.Services
             var user = await _userService.GetLoggedUserAsync(identifier, cancellationToken);
             if (user == null) return null;
 
-            return _currentPackages.ContainsKey(user.Username) ? _currentPackages[user.Username] : new Package[0];
+            return _currentPackages.ContainsKey(user.Username) ? _currentPackages[user.Username] : Array.Empty<Package>();
         }
 
         private async Task UpdateUsersPathsAndChannels(IEnumerable<UserAndChannels> users, CancellationToken cancellationToken)
@@ -214,7 +214,7 @@ namespace FlypackBot.Application.Services
             //}
             //else _retriesCount = 0;
 
-            var current = _currentPackages.ContainsKey(username) ? _currentPackages[username] : new Package[0];
+            var current = _currentPackages.ContainsKey(username) ? _currentPackages[username] : Array.Empty<Package>();
             var filteredPackages = FilterPackages(packages, current, username);
             _currentPackages[username] = packages;
             return filteredPackages;
