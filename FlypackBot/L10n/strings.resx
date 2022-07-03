@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+	<!-- Texts -->
+	<data name="InlineQueryAnswerMessage">
+		<value>{0}\nListo, respuesta: *{1}*</value>
+    </data>
+
 	<!-- Start Command Texts -->
 	<data name="DontKnowYouMessage">
 		<value>"Do I know you? ಠ_ಠ"</value>
@@ -64,8 +69,41 @@
 	<data name="ChangeYourPasswordWarningMessage">
 		<value>⚠️ I would advise you to change your password as soon as possible.</value>
     </data>
+	
+	<!-- Stop Command Texts -->
+	<data name="StopBotConfirmationMessage">
+		<value>Are you sure you want to stop the bot?</value>
+    </data>
+	
+	<data name="StoppedBotMessage">
+		<value>From this moment you will no longer receive notifications about your packages. At the same time, the information related to your user has been deleted.</value>
+    </data>
+	
+	<data name="StoppedBotFollowUpMessage">
+		<value>Also, the users that you have previously authorized have been removed and will no longer receive notifications.</value>
+    </data>
+	
+	<data name="StoppedBotAuthorizedUsersMessage">
+		<value>From this moment you will no longer receive notifications about the packages associated with the FLY-{0} account. The original logged in user has stopped the bot's functions.\nYou can log in yourself using the /start command.</value>
+    </data>
 
-	<!-- Packages Command Texts-->
+	<data name="YesKeyword">
+		<value>yes</value>
+    </data>
+
+	<data name="YesText">
+		<value>Yes</value>
+    </data>
+	
+	<data name="NoKeyword">
+		<value>no</value>
+    </data>
+
+	<data name="NoText">
+		<value>No</value>
+    </data>
+
+	<!-- Packages Command Texts -->
 	<data name="EmptyPackageListMessage">
 		<value>Empty packages list 📭</value>
 	</data>

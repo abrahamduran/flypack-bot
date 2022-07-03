@@ -121,20 +121,20 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}\nListo, respuesta: *{1}*.
+        /// </summary>
+        internal static string InlineQueryAnswerMessage {
+            get {
+                return ResourceManager.GetString("InlineQueryAnswerMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to permitir.
         /// </summary>
         internal static string LoginAttemptAllowText {
             get {
                 return ResourceManager.GetString("LoginAttemptAllowText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to {0}\nListo, respuesta: *{1}*.
-        /// </summary>
-        internal static string LoginAttemptAnswerMessage {
-            get {
-                return ResourceManager.GetString("LoginAttemptAnswerMessage", resourceCulture);
             }
         }
         
@@ -162,6 +162,24 @@ namespace FlypackBot.L10n {
         internal static string LoginWelcomeMessage {
             get {
                 return ResourceManager.GetString("LoginWelcomeMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no.
+        /// </summary>
+        internal static string NoKeyword {
+            get {
+                return ResourceManager.GetString("NoKeyword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        internal static string NoText {
+            get {
+                return ResourceManager.GetString("NoText", resourceCulture);
             }
         }
         
@@ -229,6 +247,42 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ¿Estás seguro que quieres detener el bot?.
+        /// </summary>
+        internal static string StopBotConfirmationMessage {
+            get {
+                return ResourceManager.GetString("StopBotConfirmationMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A partir de este momento ya no recibirás más notificaciones sobre los paquetes asociados a la cuenta FLY-{0}. El usuario que se ha logueado previamente ha detenido las funciones del bot.\nSi deseas, puedes iniciar sesión usando el comando /start..
+        /// </summary>
+        internal static string StoppedBotAuthorizedUsersMessage {
+            get {
+                return ResourceManager.GetString("StoppedBotAuthorizedUsersMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Así mismo, los usuarios que has autorizado previamente han sido removidos y dejarán de recibir notificaciones..
+        /// </summary>
+        internal static string StoppedBotFollowUpMessage {
+            get {
+                return ResourceManager.GetString("StoppedBotFollowUpMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A partir de este momento ya no recibirás más notificaciones sobre tus paquetes. De igual forma, la información relacionada a tu usuario ha sido eliminada..
+        /// </summary>
+        internal static string StoppedBotMessage {
+            get {
+                return ResourceManager.GetString("StoppedBotMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to usuario, contraseña.
         /// </summary>
         internal static string UsernameAndPasswordPlaceholder {
@@ -270,6 +324,24 @@ namespace FlypackBot.L10n {
         internal static string WrongUsernameAndPasswordMessage {
             get {
                 return ResourceManager.GetString("WrongUsernameAndPasswordMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to si.
+        /// </summary>
+        internal static string YesKeyword {
+            get {
+                return ResourceManager.GetString("YesKeyword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sí.
+        /// </summary>
+        internal static string YesText {
+            get {
+                return ResourceManager.GetString("YesText", resourceCulture);
             }
         }
     }

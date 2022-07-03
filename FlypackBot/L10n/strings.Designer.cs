@@ -121,6 +121,15 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0}\nListo, respuesta: *{1}*.
+        /// </summary>
+        internal static string InlineQueryAnswerMessage {
+            get {
+                return ResourceManager.GetString("InlineQueryAnswerMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to allow.
         /// </summary>
         internal static string LoginAttemptAllowText {
@@ -162,6 +171,24 @@ namespace FlypackBot.L10n {
         internal static string LoginWelcomeMessage {
             get {
                 return ResourceManager.GetString("LoginWelcomeMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to no.
+        /// </summary>
+        internal static string NoKeyword {
+            get {
+                return ResourceManager.GetString("NoKeyword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        internal static string NoText {
+            get {
+                return ResourceManager.GetString("NoText", resourceCulture);
             }
         }
         
@@ -229,6 +256,42 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to stop the bot?.
+        /// </summary>
+        internal static string StopBotConfirmationMessage {
+            get {
+                return ResourceManager.GetString("StopBotConfirmationMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to From this moment you will no longer receive notifications about the packages associated with the FLY-{0} account. The original logged in user has stopped the bot&apos;s functions.\nYou can log in yourself using the /start command..
+        /// </summary>
+        internal static string StoppedBotAuthorizedUsersMessage {
+            get {
+                return ResourceManager.GetString("StoppedBotAuthorizedUsersMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Also, the users that you have previously authorized have been removed and will no longer receive notifications..
+        /// </summary>
+        internal static string StoppedBotFollowUpMessage {
+            get {
+                return ResourceManager.GetString("StoppedBotFollowUpMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to From this moment you will no longer receive notifications about your packages. At the same time, the information related to your user has been deleted..
+        /// </summary>
+        internal static string StoppedBotMessage {
+            get {
+                return ResourceManager.GetString("StoppedBotMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to username, password.
         /// </summary>
         internal static string UsernameAndPasswordPlaceholder {
@@ -270,6 +333,24 @@ namespace FlypackBot.L10n {
         internal static string WrongUsernameAndPasswordMessage {
             get {
                 return ResourceManager.GetString("WrongUsernameAndPasswordMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to yes.
+        /// </summary>
+        internal static string YesKeyword {
+            get {
+                return ResourceManager.GetString("YesKeyword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        internal static string YesText {
+            get {
+                return ResourceManager.GetString("YesText", resourceCulture);
             }
         }
     }

@@ -1,5 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
+	<!-- Texts -->
+	<data name="InlineQueryAnswerMessage">
+		<value>{0}\nListo, respuesta: *{1}*</value>
+    </data>
+
 	<!-- Start Command Texts -->
 	<data name="DontKnowYouMessage">
 		<value>"Pero... yo ni si quiera te conozco. ಠ_ಠ"</value>
@@ -41,10 +46,6 @@
 		<value>Hey {0}, el usuario {1} está tratando de iniciar sesión con tu cuenta de Flypack, ¿estás de acuerdo con esto?</value>
     </data>
 
-	<data name="LoginAttemptAnswerMessage">
-		<value>{0}\nListo, respuesta: *{1}*</value>
-    </data>
-
 	<data name="DeniedLoginAttemptMessage">
 		<value>Disculpa... tu intento de inicio de sesión no ha sido aprobado.</value>
     </data>
@@ -65,7 +66,40 @@
 		<value>⚠️ Te recomiendo que cambies tu contraseña tan pronto te sea posible.</value>
     </data>
 
-	<!-- Packages Command Texts-->
+	<!-- Stop Command Texts -->
+	<data name="StopBotConfirmationMessage">
+		<value>¿Estás seguro que quieres detener el bot?</value>
+    </data>
+
+	<data name="StoppedBotMessage">
+		<value>A partir de este momento ya no recibirás más notificaciones sobre tus paquetes. De igual forma, la información relacionada a tu usuario ha sido eliminada.</value>
+    </data>
+
+	<data name="StoppedBotFollowUpMessage">
+		<value>Así mismo, los usuarios que has autorizado previamente han sido removidos y dejarán de recibir notificaciones.</value>
+    </data>
+
+	<data name="StoppedBotAuthorizedUsersMessage">
+		<value>A partir de este momento ya no recibirás más notificaciones sobre los paquetes asociados a la cuenta FLY-{0}. El usuario que se ha logueado previamente ha detenido las funciones del bot.\nSi deseas, puedes iniciar sesión usando el comando /start.</value>
+    </data>
+
+	<data name="YesKeyword">
+		<value>si</value>
+    </data>
+
+	<data name="YesText">
+		<value>Sí</value>
+    </data>
+	
+	<data name="NoKeyword">
+		<value>no</value>
+    </data>
+
+	<data name="NoText">
+		<value>No</value>
+    </data>
+
+	<!-- Packages Command Texts -->
 	<data name="EmptyPackageListMessage">
 		<value>Lista de paquetes vacía 📭</value>
 	</data>
