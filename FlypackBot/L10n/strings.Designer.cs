@@ -121,6 +121,15 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Your new password cannot be a blank message. 😑.
+        /// </summary>
+        internal static string EmptyPasswordMessage {
+            get {
+                return ResourceManager.GetString("EmptyPasswordMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0}\nListo, respuesta: *{1}*.
         /// </summary>
         internal static string InlineQueryAnswerMessage {
@@ -292,6 +301,15 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The password has been updated. 🎉.
+        /// </summary>
+        internal static string UpdatedPasswordMessage {
+            get {
+                return ResourceManager.GetString("UpdatedPasswordMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to username, password.
         /// </summary>
         internal static string UsernameAndPasswordPlaceholder {
@@ -324,6 +342,15 @@ namespace FlypackBot.L10n {
         internal static string WelcomeMessage {
             get {
                 return ResourceManager.GetString("WelcomeMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The new password is incorrect. 🥴&quot;.
+        /// </summary>
+        internal static string WrongPasswordMessage {
+            get {
+                return ResourceManager.GetString("WrongPasswordMessage", resourceCulture);
             }
         }
         

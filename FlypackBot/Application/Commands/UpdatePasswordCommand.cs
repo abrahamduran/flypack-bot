@@ -30,7 +30,7 @@ namespace FlypackBot.Application.Commands
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Pero... yo ni si quiera te conozco. ಠ_ಠ",
+                    text: L10n.strings.DontKnowYouMessage,
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
@@ -42,7 +42,7 @@ namespace FlypackBot.Application.Commands
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Tu nueva contraseña no puede ser un mensaje en blanco. 😑",
+                    text: L10n.strings.EmptyPasswordMessage,
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
@@ -57,7 +57,7 @@ namespace FlypackBot.Application.Commands
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "La nueva contraseña parece ser incorrecta. 🥴",
+                    text: L10n.strings.WrongPasswordMessage,
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
@@ -83,7 +83,7 @@ namespace FlypackBot.Application.Commands
             await _userRepository.UpdateAsync(user, cancellationToken);
             await client.SendTextMessageAsync(
                 chatId: message.Chat,
-                text: "La nueva contraseña ha sido actualizada. 🎉",
+                text: L10n.strings.UpdatedPasswordMessage,
                 replyToMessageId: message.MessageId,
                 cancellationToken: cancellationToken
             );

@@ -135,4 +135,17 @@
 	<data name="PoundsText">
 		<value>lb</value>
     </data>
+
+	<!-- Change Password Texts -->
+	<data name="EmptyPasswordMessage">
+		<value>Your new password cannot be a blank message. 😑</value>
+    </data>
+
+	<data name="WrongPasswordMessage">
+		<value>The new password is incorrect. 🥴"</value>
+    </data>
+
+	<data name="UpdatedPasswordMessage">
+		<value>The password has been updated. 🎉</value>
+    </data>
 </root>
