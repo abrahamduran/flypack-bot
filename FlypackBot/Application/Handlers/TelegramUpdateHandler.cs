@@ -114,14 +114,16 @@ namespace FlypackBot.Application.Handlers
             var command = message.Text
                 .Replace('@', ' ')
                 .Split(' ')
-                .First();
+                .First()
+                .Replace("/", "");
 
-            return command switch
+            return L10nCommands.Normalize(command) switch
             {
                 "/start" => _startCommand.Handle(client, message, cancellationToken),
-                "/paquetes" => _packagesCommand.Handle(client, message, cancellationToken),
-                "/cambiar_clave" => _updatePasswordCommand.Handle(client, message, cancellationToken),
+                "/packages" => _packagesCommand.Handle(client, message, cancellationToken),
+                "/change_password" => _updatePasswordCommand.Handle(client, message, cancellationToken),
                 "/stop" => _stopCommand.Handle(client, message, cancellationToken),
+                "/psa" => Task.CompletedTask,
                 _ => Task.Run(() =>
                 {
                     _logger.LogWarning("Unrecognized command send by user {User}. Command: {Command}", message.From, command);

@@ -54,6 +54,10 @@ namespace FlypackBot
         {
             await _session.LoadAsync(cancellationToken);
 
+            await _telegram.SetMyCommandsAsync(L10nCommands.Spanish, null, "es", cancellationToken);
+            await _telegram.SetMyCommandsAsync(L10nCommands.English, null, "en", cancellationToken);
+            await _telegram.SetMyCommandsAsync(L10nCommands.French, null, "fr", cancellationToken);
+
             //Telegram
             var allowed = new[] { UpdateType.Message,/* UpdateType.ChannelPost,*/ UpdateType.InlineQuery, UpdateType.CallbackQuery };
             var receiverOptions = new ReceiverOptions() { AllowedUpdates = allowed };
