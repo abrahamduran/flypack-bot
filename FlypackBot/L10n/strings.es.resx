@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- Start Command Texts -->
+	<data name="DontKnowYouMessage">
+		<value>"Pero... yo ni si quiera te conozco. ಠ_ಠ"</value>
+    </data>
+
+	<data name="WeHaveAlreadyMetMessage">
+		<value>Me parece que ya hemos pasado por esto, quizás ya has enviado ese comando anteriormente. _Déjà vu_</value>
+    </data>
+
+	<data name="WelcomeMessage">
+		<value>¡Hola! Como tal vez ya sepas, este bot te ayudará con el seguimiento de tus paquetes de [Flypack](https://www.flypack.com.do).\n_Este bot no posee ninguna relación jurídica con la empresa Flypack o sus allegados._</value>
+    </data>
+
+	<data name="SendUsernameAndPasswordMessage">
+		<value>Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_.</value>
+    </data>
+
+	<data name="SendUsernameAndPasswordSecondMessage">
+		<value>Por favor, mándame tu usuario y contraseña.\n\nMándalos de esta forma: *usuario, contraseña*, utilizando una coma (,) en medio de.</value>
+    </data>
+
+	<data name="WrongUsernameAndPasswordMessage">
+		<value>*Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_.</value>
+    </data>
+
+	<data name="UsernameAndPasswordPlaceholder">
+		<value>usuario, contraseña</value>
+    </data>
+
+	<data name="AlreadyLoggedInWithThatAccountMessage">
+		<value>Hmm... esto es extraño, pero, al parecer otra persona ya se ha logueado con esa cuenta. Te pido que me des unos minutos en lo que verifico esta situación.</value>
+    </data>
+
+	<data name="LoginWelcomeMessage">
+		<value>¡Hola {0}! He podido iniciar sesión con tu usuario, ahora me mantendré monitoreando el estado de tus paquetes.</value>
+    </data>
+
+	<data name="LoginAttemptRequestPermissionMessage">
+		<value>Hey {0}, el usuario {1} está tratando de iniciar sesión con tu cuenta de Flypack, ¿estás de acuerdo con esto?</value>
+    </data>
+
+	<data name="LoginAttemptAnswerMessage">
+		<value>{0}\nListo, respuesta: *{1}*</value>
+    </data>
+
+	<data name="DeniedLoginAttemptMessage">
+		<value>Disculpa... tu intento de inicio de sesión no ha sido aprobado.</value>
+    </data>
+
+	<data name="AllowedLoginAttemptMessage">
+		<value>Tu inicio de sesión ha sido aprobado.</value>
+    </data>
+
+	<data name="LoginAttemptAllowText">
+		<value>permitir</value>
+    </data>
+	
+	<data name="LoginAttemptDenyText">
+		<value>denegar</value>
+    </data>
+
+	<data name="ChangeYourPasswordWarningMessage">
+		<value>⚠️ Te recomiendo que cambies tu contraseña tan pronto te sea posible.</value>
+    </data>
+
+	<!-- Packages Command Texts-->
+	<data name="EmptyPackageListMessage">
+		<value>Lista de paquetes vacía 📭</value>
+	</data>
+
+	<data name="PackageStatus">
+		<value>Estado de paquetes</value>
+    </data>
+
+	<data name="PackagesInProcessMessage">
+		<value>Tienes {0} paquetes en proceso</value>
+    </data>
+
+	<data name="DescriptionField">
+		<value>Descripción</value>
+    </data>
+	
+	<data name="ReceivedByField">
+		<value>Recibido</value>
+    </data>
+	
+	<data name="WeightField">
+		<value>Peso</value>
+    </data>
+	
+	<data name="StatusField">
+		<value>Estado</value>
+    </data>
+	
+	<data name="PoundsText">
+		<value>libras</value>
+    </data>
+</root>
