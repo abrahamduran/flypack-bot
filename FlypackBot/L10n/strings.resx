@@ -46,10 +46,6 @@
 		<value>Hey {0}, the user {1} is trying to login with your Flypack account, are you ok with this?</value>
     </data>
 
-	<data name="LoginAttemptAnswerMessage">
-		<value>{0}\nDone, answer: *{1}*</value>
-    </data>
-	
 	<data name="DeniedLoginAttemptMessage">
 		<value>Sorry... your login attempt was denied.</value>
     </data>
@@ -118,6 +114,10 @@
 	
 	<data name="DescriptionField">
 		<value>Description</value>
+    </data>
+	
+	<data name="TrackingField">
+		<value>Tracking</value>
     </data>
 	
 	<data name="ReceivedByField">

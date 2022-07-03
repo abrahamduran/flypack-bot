@@ -116,6 +116,10 @@
 		<value>Descripción</value>
     </data>
 	
+	<data name="TrackingField">
+		<value>Tracking</value>
+    </data>
+	
 	<data name="ReceivedByField">
 		<value>Recibido</value>
     </data>

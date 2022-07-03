@@ -19,14 +19,14 @@ namespace FlypackBot.L10n {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.Build.Tasks.StronglyTypedResourceBuilder", "15.1.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class strings_es {
+    internal class strings_fr {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal strings_es() {
+        internal strings_fr() {
         }
         
         /// <summary>
@@ -36,7 +36,7 @@ namespace FlypackBot.L10n {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FlypackBot.L10n.strings.es", typeof(strings_es).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("FlypackBot.L10n.strings.fr", typeof(strings_fr).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -58,7 +58,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tu inicio de sesión ha sido aprobado..
+        ///   Looks up a localized string similar to Votre tentative de connexion a été approuvée..
         /// </summary>
         internal static string AllowedLoginAttemptMessage {
             get {
@@ -67,7 +67,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hmm... esto es extraño, pero, al parecer otra persona ya se ha logueado con esa cuenta. Te pido que me des unos minutos en lo que verifico esta situación..
+        ///   Looks up a localized string similar to Hmm... bizarre, apparemment quelqu&apos;un s&apos;est déjà connecté avec ce compte. Donnez-moi un peu de temps pendant que je réfléchis..
         /// </summary>
         internal static string AlreadyLoggedInWithThatAccountMessage {
             get {
@@ -76,7 +76,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ⚠️ Te recomiendo que cambies tu contraseña tan pronto te sea posible..
+        ///   Looks up a localized string similar to ⚠️ Je vous conseille de changer votre mot de passe dès que possible..
         /// </summary>
         internal static string ChangeYourPasswordWarningMessage {
             get {
@@ -85,7 +85,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Disculpa... tu intento de inicio de sesión no ha sido aprobado..
+        ///   Looks up a localized string similar to Désolé... votre tentative de connexion a été refusée..
         /// </summary>
         internal static string DeniedLoginAttemptMessage {
             get {
@@ -94,7 +94,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Descripción.
+        ///   Looks up a localized string similar to Description.
         /// </summary>
         internal static string DescriptionField {
             get {
@@ -103,7 +103,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;Pero... yo ni si quiera te conozco. ಠ_ಠ&quot;.
+        ///   Looks up a localized string similar to &quot;Je vous connais? ಠ_ಠ&quot;.
         /// </summary>
         internal static string DontKnowYouMessage {
             get {
@@ -112,7 +112,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Lista de paquetes vacía 📭.
+        ///   Looks up a localized string similar to Liste des packages vides 📭.
         /// </summary>
         internal static string EmptyPackageListMessage {
             get {
@@ -121,7 +121,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tu contraseña no puede ser un mensaje en blanco. 😑.
+        ///   Looks up a localized string similar to Votre nouveau mot de passe ne peut pas être un message vide. 😑.
         /// </summary>
         internal static string EmptyPasswordMessage {
             get {
@@ -130,7 +130,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}\nListo, respuesta: *{1}*.
+        ///   Looks up a localized string similar to {0}\nListe, réponse: *{1}*.
         /// </summary>
         internal static string InlineQueryAnswerMessage {
             get {
@@ -139,7 +139,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to permitir.
+        ///   Looks up a localized string similar to autoriser.
         /// </summary>
         internal static string LoginAttemptAllowText {
             get {
@@ -148,7 +148,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to denegar.
+        ///   Looks up a localized string similar to nier.
         /// </summary>
         internal static string LoginAttemptDenyText {
             get {
@@ -157,7 +157,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hey {0}, el usuario {1} está tratando de iniciar sesión con tu cuenta de Flypack, ¿estás de acuerdo con esto?.
+        ///   Looks up a localized string similar to Hé {0}, l&apos;utilisateur {1} essaie de se connecter avec votre compte Flypack, ça vous convient ?.
         /// </summary>
         internal static string LoginAttemptRequestPermissionMessage {
             get {
@@ -166,7 +166,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ¡Hola {0}! He podido iniciar sesión con tu usuario, ahora me mantendré monitoreando el estado de tus paquetes..
+        ///   Looks up a localized string similar to Salut {0}! J&apos;ai pu me connecter avec votre utilisateur, maintenant je vais surveiller l&apos;état de vos colis..
         /// </summary>
         internal static string LoginWelcomeMessage {
             get {
@@ -175,7 +175,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to no.
+        ///   Looks up a localized string similar to non.
         /// </summary>
         internal static string NoKeyword {
             get {
@@ -184,7 +184,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No.
+        ///   Looks up a localized string similar to Non.
         /// </summary>
         internal static string NoText {
             get {
@@ -193,7 +193,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tienes {0} paquetes en proceso.
+        ///   Looks up a localized string similar to Vous avez {0} packages en cours de traitement.
         /// </summary>
         internal static string PackagesInProcessMessage {
             get {
@@ -202,7 +202,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Estado de paquetes.
+        ///   Looks up a localized string similar to Statut des colis.
         /// </summary>
         internal static string PackageStatus {
             get {
@@ -211,7 +211,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to libras.
+        ///   Looks up a localized string similar to lb.
         /// </summary>
         internal static string PoundsText {
             get {
@@ -220,7 +220,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Recibido.
+        ///   Looks up a localized string similar to Reçu par.
         /// </summary>
         internal static string ReceivedByField {
             get {
@@ -229,7 +229,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_..
+        ///   Looks up a localized string similar to Veuillez m&apos;envoyer votre nom d&apos;utilisateur et votre mot de passe, afin que je puisse surveiller vos colis et leur statut. Ne vous inquiétez pas, je garderai vos informations d&apos;identification en sécurité.\n\nEnvoyez-les de cette façon : _nom d&apos;utilisateur_, _mot de passe_..
         /// </summary>
         internal static string SendUsernameAndPasswordMessage {
             get {
@@ -238,7 +238,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Por favor, mándame tu usuario y contraseña.\n\nMándalos de esta forma: *usuario, contraseña*, utilizando una coma (,) en medio de..
+        ///   Looks up a localized string similar to Veuillez m&apos;envoyer votre nom d&apos;utilisateur et votre mot de passe.\n\nEnvoyez-les comme ceci : *nom d&apos;utilisateur, mot de passe*, en utilisant une virgule (,) entre les deux..
         /// </summary>
         internal static string SendUsernameAndPasswordSecondMessage {
             get {
@@ -247,7 +247,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Estado.
+        ///   Looks up a localized string similar to Statut.
         /// </summary>
         internal static string StatusField {
             get {
@@ -256,7 +256,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ¿Estás seguro que quieres detener el bot?.
+        ///   Looks up a localized string similar to Voulez-vous vraiment arrêter le bot ?.
         /// </summary>
         internal static string StopBotConfirmationMessage {
             get {
@@ -265,7 +265,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A partir de este momento ya no recibirás más notificaciones sobre los paquetes asociados a la cuenta FLY-{0}. El usuario que se ha logueado previamente ha detenido las funciones del bot.\nSi deseas, puedes iniciar sesión usando el comando /start..
+        ///   Looks up a localized string similar to À partir de ce moment, vous ne recevrez plus de notifications sur les forfaits associés au compte FLY-{0}. L&apos;utilisateur initialement connecté a arrêté les fonctions du bot.\nVous pouvez vous connecter vous-même à l&apos;aide de la commande /start..
         /// </summary>
         internal static string StoppedBotAuthorizedUsersMessage {
             get {
@@ -274,7 +274,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Así mismo, los usuarios que has autorizado previamente han sido removidos y dejarán de recibir notificaciones..
+        ///   Looks up a localized string similar to De plus, les utilisateurs que vous avez précédemment autorisés ont été supprimés et ne recevront plus de notifications..
         /// </summary>
         internal static string StoppedBotFollowUpMessage {
             get {
@@ -283,7 +283,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A partir de este momento ya no recibirás más notificaciones sobre tus paquetes. De igual forma, la información relacionada a tu usuario ha sido eliminada..
+        ///   Looks up a localized string similar to À partir de ce moment, vous ne recevrez plus de notifications concernant vos colis. Dans le même temps, les informations relatives à votre utilisateur ont été supprimées..
         /// </summary>
         internal static string StoppedBotMessage {
             get {
@@ -292,7 +292,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Tracking.
+        ///   Looks up a localized string similar to Code de suivi.
         /// </summary>
         internal static string TrackingField {
             get {
@@ -301,7 +301,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to La contraseña ha sido actualizada. 🎉.
+        ///   Looks up a localized string similar to Le mot de passe a été mis à jour. 🎉.
         /// </summary>
         internal static string UpdatedPasswordMessage {
             get {
@@ -310,7 +310,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to usuario, contraseña.
+        ///   Looks up a localized string similar to nom d&apos;utilisateur, mot de passe.
         /// </summary>
         internal static string UsernameAndPasswordPlaceholder {
             get {
@@ -319,7 +319,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Me parece que ya hemos pasado por esto, quizás ya has enviado ese comando anteriormente. _Déjà vu_.
+        ///   Looks up a localized string similar to Il me semble que nous sommes déjà passés par là, peut-être avez-vous déjà envoyé cette commande auparavant. _Déjà vu_.
         /// </summary>
         internal static string WeHaveAlreadyMetMessage {
             get {
@@ -328,7 +328,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Peso.
+        ///   Looks up a localized string similar to Lester.
         /// </summary>
         internal static string WeightField {
             get {
@@ -337,7 +337,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ¡Hola! Como tal vez ya sepas, este bot te ayudará con el seguimiento de tus paquetes de [Flypack](https://www.flypack.com.do).\n_Este bot no posee ninguna relación jurídica con la empresa Flypack o sus allegados._.
+        ///   Looks up a localized string similar to Bonjour! Comme vous le savez peut-être déjà, ce bot vous aidera dans le suivi de vos colis [Flypack](https://www.flypack.com.do).\n_Ce bot n&apos;a aucun lien juridique avec la société Flypack ou ses associés._.
         /// </summary>
         internal static string WelcomeMessage {
             get {
@@ -346,7 +346,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to La contraseña parece ser incorrecta. 🥴&quot;.
+        ///   Looks up a localized string similar to Le nouveau mot de passe est incorrect. 🥴&quot;.
         /// </summary>
         internal static string WrongPasswordMessage {
             get {
@@ -355,7 +355,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to *Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_..
+        ///   Looks up a localized string similar to *Nom d&apos;utilisateur et mot de passe erronés*\nVeuillez m&apos;envoyer votre nom d&apos;utilisateur et votre mot de passe une fois de plus.\n\nEnvoyez-les de cette façon : _nom d&apos;utilisateur_, _mot de passe_..
         /// </summary>
         internal static string WrongUsernameAndPasswordMessage {
             get {
@@ -364,7 +364,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to si.
+        ///   Looks up a localized string similar to oui.
         /// </summary>
         internal static string YesKeyword {
             get {
@@ -373,7 +373,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Sí.
+        ///   Looks up a localized string similar to Oui.
         /// </summary>
         internal static string YesText {
             get {

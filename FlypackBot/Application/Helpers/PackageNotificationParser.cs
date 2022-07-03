@@ -71,7 +71,7 @@ namespace FlypackBot.Application.Helpers
             var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
             message.Add($"*ID*: {package.Identifier}");
             message.Add($"*{L10n.strings.DescriptionField}*: {description}");
-            message.Add($"*Tracking*: `{package.Tracking}`");
+            message.Add($"*{L10n.strings.TrackingField}*: `{package.Tracking}`");
 
             if (includesDeliveryDate)
                 message.Add($"*{L10n.strings.ReceivedByField}*: {package.DeliveredAt:MMM dd, yyyy}");

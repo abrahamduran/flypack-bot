@@ -148,15 +148,6 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}\nDone, answer: *{1}*.
-        /// </summary>
-        internal static string LoginAttemptAnswerMessage {
-            get {
-                return ResourceManager.GetString("LoginAttemptAnswerMessage", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to deny.
         /// </summary>
         internal static string LoginAttemptDenyText {
@@ -297,6 +288,15 @@ namespace FlypackBot.L10n {
         internal static string StoppedBotMessage {
             get {
                 return ResourceManager.GetString("StoppedBotMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tracking.
+        /// </summary>
+        internal static string TrackingField {
+            get {
+                return ResourceManager.GetString("TrackingField", resourceCulture);
             }
         }
         

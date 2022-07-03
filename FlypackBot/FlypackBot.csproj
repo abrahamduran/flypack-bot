@@ -35,6 +35,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>strings.es.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="L10n\strings.fr.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.fr.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Compile Update="L10n\strings.Designer.cs">
@@ -42,6 +46,9 @@
     </Compile>
     <Compile Update="L10n\strings.es.Designer.cs">
       <DependentUpon>strings.es.resx</DependentUpon>
+    </Compile>
+    <Compile Update="L10n\strings.fr.Designer.cs">
+      <DependentUpon>strings.fr.resx</DependentUpon>
     </Compile>
   </ItemGroup>
 </Project>
