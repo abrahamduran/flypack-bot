@@ -156,7 +156,7 @@ namespace FlypackBot.Application.Commands
         {
             var tasks = new List<Task>(6);
             tasks.Add(
-                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, string.Format(L10n.strings.LoginAttemptAnswerMessage, message.Text, answer), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
+                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, string.Format(L10n.strings.InlineQueryAnswerMessage, message.Text, answer), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
             );
             if (answer == L10n.strings.LoginAttemptDenyText)
             {
@@ -210,7 +210,7 @@ namespace FlypackBot.Application.Commands
 
             var sent = await client.SendTextMessageAsync(
                 chatId: user.ChatIdentifier,
-                text: string.Format(L10n.strings.LoginAttemptRequestPermissionMessage, user.FirstName, attemptingUser.Username ?? $"[{attemptingUser.FirstName}](tg://user?id={attemptingUser.Id})"),
+                text: string.Format(L10n.strings.LoginAttemptRequestPermissionMessage, user.FirstName, "@" + attemptingUser.Username ?? $"[{attemptingUser.FirstName}](tg://user?id={attemptingUser.Id})"),
                 parseMode: ParseMode.Markdown,
                 replyMarkup: inlineKeyboard,
                 cancellationToken: cancellationToken
