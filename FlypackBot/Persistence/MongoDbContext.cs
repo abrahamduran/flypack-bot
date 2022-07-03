@@ -29,7 +29,6 @@ namespace FlypackBot.Persistence
             var mongoUrl = new MongoUrl(settings.ConnectionString);
             var mongoSettings = MongoClientSettings.FromUrl(mongoUrl);
 #if DEBUG
-            Console.WriteLine("DEBUG");
             mongoSettings.ClusterConfigurator = cb => {
                 cb.Subscribe<CommandStartedEvent>(e => {
                     Console.WriteLine($"{e.CommandName} - {e.Command.ToJson()}");

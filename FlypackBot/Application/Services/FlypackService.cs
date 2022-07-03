@@ -47,12 +47,12 @@ namespace FlypackBot.Application.Services
 
             Task.Run(async () =>
             {
-                _currentPackages = (await _repository.GetPendingAsync(cancellationToken))
-                        .GroupBy(x => x.Username)
-                        .ToDictionary(x => x.Key, x => x.AsEnumerable());
-
                 try
                 {
+                    _currentPackages = (await _repository.GetPendingAsync(cancellationToken))
+                            .GroupBy(x => x.Username)
+                            .ToDictionary(x => x.Key, x => x.AsEnumerable());
+
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         var users = await _userService.GetUsersAsync(cancellationToken);
