@@ -158,7 +158,7 @@ namespace FlypackBot.Application.Commands
             tasks.Add(
                 client.EditMessageTextAsync(message.Chat.Id, message.MessageId, string.Format(L10n.strings.InlineQueryAnswerMessage, message.Text, answer), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
             );
-            if (answer == L10n.strings.LoginAttemptDenyText)
+            if (answer == L10n.strings.LoginAttemptDenyKeyword)
             {
                 tasks.AddRange(new[]
                 {
@@ -167,7 +167,7 @@ namespace FlypackBot.Application.Commands
                     _userRepository.UpdateUnauthorizedUsersAsync(user.Id, attemptingUser, cancellationToken)
                 });
             }
-            else if (answer == L10n.strings.LoginAttemptAllowText)
+            else if (answer == L10n.strings.LoginAttemptAllowKeyword)
             {
                 tasks.AddRange(new[]
                 {
@@ -184,9 +184,9 @@ namespace FlypackBot.Application.Commands
 
             await Task.WhenAll(tasks);
 
-            if (answer != L10n.strings.LoginAttemptAllowText) return;
+            if (answer != L10n.strings.LoginAttemptAllowKeyword) return;
 
-            var cachedUser = (await _userCache.GetUserAsync(user.Id, cancellationToken)).User;
+            var cachedUser = await _userCache.GetLoggedUserAsync(user.Id, cancellationToken);
             cachedUser.AuthorizedUsers = cachedUser.AuthorizedUsers ?? new List<SecondaryUser>(1);
             cachedUser.AuthorizedUsers.Add(attemptingUser);
             _userCache.AddOrUpdate(cachedUser);
@@ -197,14 +197,13 @@ namespace FlypackBot.Application.Commands
 
         private async Task NotifyUserOfLoginAttempt(ITelegramBotClient client, LoggedUser user, User attemptingUser, long attemptingCbatIdentifier, CancellationToken cancellationToken)
         {
-            var titleCase = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase;
             _session.Add(new SecondaryUser { ChatIdentifier = attemptingCbatIdentifier, Identifier = attemptingUser.Id, FirstName = attemptingUser.FirstName }, user.ChatIdentifier, user.Identifier, SessionScope.LoginAttempt);
             var inlineKeyboard = new InlineKeyboardMarkup(new[]
             {
                 new []
                 {
-                    InlineKeyboardButton.WithCallbackData(titleCase(L10n.strings.LoginAttemptAllowText), L10n.strings.LoginAttemptAllowText),
-                    InlineKeyboardButton.WithCallbackData(titleCase(L10n.strings.LoginAttemptDenyText), L10n.strings.LoginAttemptDenyText),
+                    InlineKeyboardButton.WithCallbackData(L10n.strings.LoginAttemptAllowText, L10n.strings.LoginAttemptAllowKeyword),
+                    InlineKeyboardButton.WithCallbackData(L10n.strings.LoginAttemptDenyText, L10n.strings.LoginAttemptDenyKeyword),
                 }
             });
 

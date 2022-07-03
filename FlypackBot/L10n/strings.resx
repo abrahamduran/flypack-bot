@@ -55,10 +55,18 @@
     </data>
 
 	<data name="LoginAttemptAllowText">
-		<value>allow</value>
+		<value>Allow</value>
     </data>
 	
 	<data name="LoginAttemptDenyText">
+		<value>Deny</value>
+    </data>
+	
+	<data name="LoginAttemptAllowKeyword">
+		<value>allow</value>
+    </data>
+	
+	<data name="LoginAttemptDenyKeyword">
 		<value>deny</value>
     </data>
 	

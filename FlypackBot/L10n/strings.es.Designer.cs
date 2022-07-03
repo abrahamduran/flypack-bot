@@ -141,6 +141,15 @@ namespace FlypackBot.L10n {
         /// <summary>
         ///   Looks up a localized string similar to permitir.
         /// </summary>
+        internal static string LoginAttemptAllowKeyword {
+            get {
+                return ResourceManager.GetString("LoginAttemptAllowKeyword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Permitir.
+        /// </summary>
         internal static string LoginAttemptAllowText {
             get {
                 return ResourceManager.GetString("LoginAttemptAllowText", resourceCulture);
@@ -149,6 +158,15 @@ namespace FlypackBot.L10n {
         
         /// <summary>
         ///   Looks up a localized string similar to denegar.
+        /// </summary>
+        internal static string LoginAttemptDenyKeyword {
+            get {
+                return ResourceManager.GetString("LoginAttemptDenyKeyword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Denegar.
         /// </summary>
         internal static string LoginAttemptDenyText {
             get {

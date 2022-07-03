@@ -55,13 +55,21 @@
     </data>
 
 	<data name="LoginAttemptAllowText">
-		<value>permitir</value>
+		<value>Permitir</value>
     </data>
 	
 	<data name="LoginAttemptDenyText">
+		<value>Denegar</value>
+    </data>
+	
+	<data name="LoginAttemptAllowKeyword">
+		<value>permitir</value>
+    </data>
+	
+	<data name="LoginAttemptDenyKeyword">
 		<value>denegar</value>
     </data>
-
+	
 	<data name="ChangeYourPasswordWarningMessage">
 		<value>⚠️ Te recomiendo que cambies tu contraseña tan pronto te sea posible.</value>
     </data>
