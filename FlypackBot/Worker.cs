@@ -17,6 +17,7 @@ namespace FlypackBot
 {
     public class Worker : BackgroundService
     {
+        private readonly Timer _timer;
         private readonly ILogger<Worker> _logger;
         private readonly ChatSessionService _session;
         private readonly UserCacheService _userCache;
@@ -50,6 +51,7 @@ namespace FlypackBot
             _packagesCommand = packagesCommand;
             _updatePasswordCommand = updatePasswordCommand;
             _telegram = new TelegramBotClient(_settings.AccessToken);
+            _timer = new Timer(async (state) => { await StoreChanges(); });
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -67,14 +69,29 @@ namespace FlypackBot
 
             // Flypack
             _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, _userCache, HandleExceptionAsync, _logger), cancellationToken);
+
+            // Store Changes Periodically
+            _timer?.Change(TimeSpan.FromHours(1), TimeSpan.FromHours(1));
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Gracefully stopped this mf");
-            await _userCache.StoreAsync(cancellationToken);
-            await _session.StoreAsync(cancellationToken);
+            _timer?.Change(Timeout.Infinite, 0);
+            await StoreChanges(cancellationToken);
             await base.StopAsync(cancellationToken);
+        }
+
+        private async Task StoreChanges(CancellationToken token = default)
+        {
+            try
+            {
+                await Task.WhenAll(_userCache.StoreAsync(token), _session.StoreAsync(token));
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(ex, token);
+            }
         }
 
         private async Task HandleExceptionAsync(Exception exception, CancellationToken cancellationToken)
