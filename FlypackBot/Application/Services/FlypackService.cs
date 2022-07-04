@@ -18,7 +18,7 @@ namespace FlypackBot.Application.Services
     {
         private const int MAX_RETRIES = 3;
         private IDictionary<string, IEnumerable<Package>> _currentPackages;
-        private IDictionary<string, IEnumerable<long>> _channels = new Dictionary<string, IEnumerable<long>>();
+        private IDictionary<string, IEnumerable<LanguageAndChannels>> _channels = new Dictionary<string, IEnumerable<LanguageAndChannels>>();
         private IDictionary<string, string> _paths = new Dictionary<string, string>();
 
         private readonly ILogger<FlypackService> _logger;
@@ -55,7 +55,8 @@ namespace FlypackBot.Application.Services
 
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        var users = await _userService.GetUsersAsync(cancellationToken);
+                        // TODO: Each call to ParseMessageFor needs to be localized for each user
+                        var users = await _userService.GetLoggedUsersAsync(cancellationToken);
                         if (users == null) continue;
 
                         await UpdateUsersPathsAndChannels(users, cancellationToken);
@@ -91,28 +92,23 @@ namespace FlypackBot.Application.Services
                 LogFailedLogin(ex, new LoggedUser { Username = username });
             }
 
-            return new Package[0];
+            return Array.Empty<Package>();
         }
 
         public async Task<IEnumerable<Package>> GetCurrentPackagesAsync(long identifier, CancellationToken cancellationToken)
         {
-            var user = await _userService.GetUserAsync(identifier, cancellationToken);
-            if (user.User == null) return null;
-            var username = user.User.Username;
+            var user = await _userService.GetLoggedUserAsync(identifier, cancellationToken);
+            if (user == null) return null;
 
-            return _currentPackages.ContainsKey(username) ? _currentPackages[username] : new Package[0];
+            return _currentPackages.ContainsKey(user.Username) ? _currentPackages[user.Username] : Array.Empty<Package>();
         }
 
         private async Task UpdateUsersPathsAndChannels(IEnumerable<UserAndChannels> users, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
-            foreach (var item in users)
+            foreach (var user in users)
             {
-                _channels[item.User.Username] = item.Channels;
-
-                if (_paths.ContainsKey(item.User.Username)) continue;
-
-                var task = UpdateUserPathAndChannels(item, cancellationToken);
+                var task = UpdateUserPathAndChannels(user, cancellationToken);
                 tasks.Add(task);
             }
 
@@ -218,7 +214,7 @@ namespace FlypackBot.Application.Services
             //}
             //else _retriesCount = 0;
 
-            var current = _currentPackages.ContainsKey(username) ? _currentPackages[username] : new Package[0];
+            var current = _currentPackages.ContainsKey(username) ? _currentPackages[username] : Array.Empty<Package>();
             var filteredPackages = FilterPackages(packages, current, username);
             _currentPackages[username] = packages;
             return filteredPackages;

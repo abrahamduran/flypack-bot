@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using FlypackBot.Domain.Models;
@@ -23,12 +22,12 @@ namespace FlypackBot.Application.Helpers
         public string ParseMessageFor(IEnumerable<Package> packages, Dictionary<string, Package> previousPackages, bool isUpdate)
         {
             if (packages == null || !packages.Any())
-                return "Lista de paquetes vacía 📭";
+                return L10n.strings.EmptyPackageListMessage;
 
             var messages = new List<string>();
-            messages.Add($"*Estado de paquetes*");
+            messages.Add($"*{L10n.strings.PackageStatus}*");
             if (packages.Count() > SIMPLE_PACKAGES_AMOUNT && !isUpdate)
-                messages.Add($"_Tienes {packages.Count()} paquetes en proceso_");
+                messages.Add($"_{string.Format(L10n.strings.PackagesInProcessMessage, packages.Count())}_");
 
             var entitiesCount = 2;
             foreach (var package in packages)
@@ -71,23 +70,23 @@ namespace FlypackBot.Application.Helpers
 
             var description = CultureInfo.CurrentCulture.TextInfo.ToTitleCase(package.Description.ToLower());
             message.Add($"*ID*: {package.Identifier}");
-            message.Add($"*Descripción*: {description}");
-            message.Add($"*Tracking*: `{package.Tracking}`");
+            message.Add($"*{L10n.strings.DescriptionField}*: {description}");
+            message.Add($"*{L10n.strings.TrackingField}*: `{package.Tracking}`");
 
             if (includesDeliveryDate)
-                message.Add($"*Recibido*: {package.DeliveredAt:MMM dd, yyyy}");
+                message.Add($"*{L10n.strings.ReceivedByField}*: {package.DeliveredAt:MMM dd, yyyy}");
 
             var previous = previousPackages?.ContainsKey(package.Identifier) == true ? previousPackages[package.Identifier] : package;
 
             if (previous.Weight != package.Weight)
-                message.Add($"*Peso*: {previous.Weight} → {package.Weight} libras");
+                message.Add($"*{L10n.strings.WeightField}*: {previous.Weight} → {package.Weight} {L10n.strings.PoundsText}");
             else
-                message.Add($"*Peso*: {package.Weight} libras");
+                message.Add($"*{L10n.strings.WeightField}*: {package.Weight} {L10n.strings.PoundsText}");
 
             if (previous.Status != package.Status)
-                message.Add($"*Estado*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎉" : ""));
+                message.Add($"*{L10n.strings.StatusField}*: {previous.Status.Description} → {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎉" : ""));
             else
-                message.Add($"*Estado*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎉" : ""));
+                message.Add($"*{L10n.strings.StatusField}*: {package.Status.Description}, _{package.Status.Percentage}_" + (package.Status.Percentage == "90%" ? " 🎉" : ""));
 
             return message;
         }

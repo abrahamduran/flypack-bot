@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- Texts -->
+	<data name="InlineQueryAnswerMessage">
+		<value>{0}\nListe, réponse: *{1}*</value>
+    </data>
+
+	<!-- Start Command Texts -->
+	<data name="DontKnowYouMessage">
+		<value>"Je vous connais? ಠ_ಠ"</value>
+    </data>
+
+	<data name="WeHaveAlreadyMetMessage">
+		<value>Il me semble que nous sommes déjà passés par là, peut-être avez-vous déjà envoyé cette commande auparavant. _Déjà vu_</value>
+    </data>
+	
+	<data name="WelcomeMessage">
+		<value>Bonjour! Comme vous le savez peut-être déjà, ce bot vous aidera dans le suivi de vos colis [Flypack](https://www.flypack.com.do).\n_Ce bot n'a aucun lien juridique avec la société Flypack ou ses associés._</value>
+    </data>
+	
+	<data name="SendUsernameAndPasswordMessage">
+		<value>Veuillez m'envoyer votre nom d'utilisateur et votre mot de passe, afin que je puisse surveiller vos colis et leur statut. Ne vous inquiétez pas, je garderai vos informations d'identification en sécurité.\n\nEnvoyez-les de cette façon : _nom d'utilisateur_, _mot de passe_.</value>
+    </data>
+	
+	<data name="SendUsernameAndPasswordSecondMessage">
+		<value>Veuillez m'envoyer votre nom d'utilisateur et votre mot de passe.\n\nEnvoyez-les comme ceci : *nom d'utilisateur, mot de passe*, en utilisant une virgule (,) entre les deux.</value>
+    </data>
+	
+	<data name="WrongUsernameAndPasswordMessage">
+		<value>*Nom d'utilisateur et mot de passe erronés*\nVeuillez m'envoyer votre nom d'utilisateur et votre mot de passe une fois de plus.\n\nEnvoyez-les de cette façon : _nom d'utilisateur_, _mot de passe_.</value>
+    </data>
+
+	<data name="UsernameAndPasswordPlaceholder">
+		<value>nom d'utilisateur, mot de passe</value>
+    </data>
+	
+	<data name="AlreadyLoggedInWithThatAccountMessage">
+		<value>Hmm... bizarre, apparemment quelqu'un s'est déjà connecté avec ce compte. Donnez-moi un peu de temps pendant que je réfléchis.</value>
+    </data>
+	
+	<data name="LoginWelcomeMessage">
+		<value>Salut {0}! J'ai pu me connecter avec votre utilisateur, maintenant je vais surveiller l'état de vos colis.</value>
+    </data>
+	
+	<data name="LoginAttemptRequestPermissionMessage">
+		<value>Hé {0}, l'utilisateur {1} essaie de se connecter avec votre compte Flypack, ça vous convient ?</value>
+    </data>
+
+	<data name="DeniedLoginAttemptMessage">
+		<value>Désolé... votre tentative de connexion a été refusée.</value>
+    </data>
+	
+	<data name="AllowedLoginAttemptMessage">
+		<value>Votre tentative de connexion a été approuvée.</value>
+    </data>
+
+	<data name="LoginAttemptAllowText">
+		<value>Autoriser</value>
+    </data>
+	
+	<data name="LoginAttemptDenyText">
+		<value>Nier</value>
+    </data>
+	
+	<data name="LoginAttemptAllowKeyword">
+		<value>autoriser</value>
+    </data>
+	
+	<data name="LoginAttemptDenyKeyword">
+		<value>nier</value>
+    </data>
+	
+	<data name="ChangeYourPasswordWarningMessage">
+		<value>⚠️ Je vous conseille de changer votre mot de passe dès que possible.</value>
+    </data>
+	
+	<!-- Stop Command Texts -->
+	<data name="StopBotConfirmationMessage">
+		<value>Voulez-vous vraiment arrêter le bot ?</value>
+    </data>
+	
+	<data name="StoppedBotMessage">
+		<value>À partir de ce moment, vous ne recevrez plus de notifications concernant vos colis. Dans le même temps, les informations relatives à votre utilisateur ont été supprimées.</value>
+    </data>
+	
+	<data name="StoppedBotFollowUpMessage">
+		<value>De plus, les utilisateurs que vous avez précédemment autorisés ont été supprimés et ne recevront plus de notifications.</value>
+    </data>
+	
+	<data name="StoppedBotAuthorizedUsersMessage">
+		<value>À partir de ce moment, vous ne recevrez plus de notifications sur les forfaits associés au compte FLY-{0}. L'utilisateur initialement connecté a arrêté les fonctions du bot.\nVous pouvez vous connecter vous-même à l'aide de la commande /start.</value>
+    </data>
+
+	<data name="YesKeyword">
+		<value>oui</value>
+    </data>
+
+	<data name="YesText">
+		<value>Oui</value>
+    </data>
+	
+	<data name="NoKeyword">
+		<value>non</value>
+    </data>
+
+	<data name="NoText">
+		<value>Non</value>
+    </data>
+
+	<!-- Packages Command Texts -->
+	<data name="EmptyPackageListMessage">
+		<value>Liste des packages vides 📭</value>
+	</data>
+
+	<data name="PackageStatus">
+		<value>Statut des colis</value>
+    </data>
+
+	<data name="PackagesInProcessMessage">
+		<value>Vous avez {0} packages en cours de traitement</value>
+    </data>
+	
+	<data name="DescriptionField">
+		<value>Description</value>
+    </data>
+	
+	<data name="TrackingField">
+		<value>Code de suivi</value>
+    </data>
+	
+	<data name="ReceivedByField">
+		<value>Reçu par</value>
+    </data>
+	
+	<data name="WeightField">
+		<value>Lester</value>
+    </data>
+	
+	<data name="StatusField">
+		<value>Statut</value>
+    </data>
+	
+	<data name="PoundsText">
+		<value>lb</value>
+    </data>
+
+	<!-- Change Password Texts -->
+	<data name="EmptyPasswordMessage">
+		<value>Votre nouveau mot de passe ne peut pas être un message vide. 😑</value>
+    </data>
+
+	<data name="WrongPasswordMessage">
+		<value>Le nouveau mot de passe est incorrect. 🥴"</value>
+    </data>
+
+	<data name="UpdatedPasswordMessage">
+		<value>Le mot de passe a été mis à jour. 🎉</value>
+    </data>
+</root>

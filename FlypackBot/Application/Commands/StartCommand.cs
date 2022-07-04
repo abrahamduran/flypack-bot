@@ -50,7 +50,7 @@ namespace FlypackBot.Application.Commands
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Me parece que ya hemos pasado por esto, quizás ya has enviado ese comando anteriormente. _Déjà vu_",
+                    text: L10n.strings.WeHaveAlreadyMetMessage,
                     parseMode: ParseMode.Markdown,
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
@@ -60,7 +60,7 @@ namespace FlypackBot.Application.Commands
 
             await client.SendTextMessageAsync(
                 chatId: message.Chat,
-                text: "¡Hola! Como tal vez ya sepas, este bot te ayudará con el seguimiento de tus paquetes de [Flypack](https://www.flypack.com.do).\n_Este bot no posee ninguna relación jurídica con la empresa Flypack o sus allegados._",
+                text: L10n.strings.WelcomeMessage,
                 parseMode: ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
@@ -69,9 +69,9 @@ namespace FlypackBot.Application.Commands
 
             var sent = await client.SendTextMessageAsync(
                 chatId: message.Chat,
-                text: "Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_.",
+                text: L10n.strings.SendUsernameAndPasswordMessage,
                 parseMode: ParseMode.Markdown,
-                replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = "usuario, contraseña" },
+                replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = L10n.strings.UsernameAndPasswordPlaceholder },
                 cancellationToken: cancellationToken
             );
 
@@ -86,9 +86,9 @@ namespace FlypackBot.Application.Commands
             {
                 var sent = await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Por favor, mándame tu usuario y contraseña.\n\nMándalos de esta forma: *usuario, contraseña*, utilizando una coma (,) en medio de.",
+                    text: L10n.strings.SendUsernameAndPasswordSecondMessage,
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = "usuario, contraseña" },
+                    replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = L10n.strings.UsernameAndPasswordPlaceholder },
                     cancellationToken: cancellationToken
                 );
                 _session.Add(sent, message.From.Id, SessionScope.Login);
@@ -100,9 +100,9 @@ namespace FlypackBot.Application.Commands
             {
                 var sent = await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "*Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_.",
+                    text: L10n.strings.WrongUsernameAndPasswordMessage,
                     parseMode: ParseMode.Markdown,
-                    replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = "usuario, contraseña" },
+                    replyMarkup: new ForceReplyMarkup() { InputFieldPlaceholder = L10n.strings.UsernameAndPasswordPlaceholder },
                     cancellationToken: cancellationToken
                 );
                 _session.Add(sent, message.From.Id, SessionScope.Login);
@@ -124,8 +124,7 @@ namespace FlypackBot.Application.Commands
 
                 var sent = await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Hmm..., esto es extraño, pero, al parecer otra persona ya se ha logueado con esta cuenta. "
-                    + "Te pido que me des unos minutos en lo que verifico esta situación.",
+                    text: L10n.strings.AlreadyLoggedInWithThatAccountMessage,
                     parseMode: ParseMode.Markdown,
                     cancellationToken: cancellationToken
                 );
@@ -141,7 +140,7 @@ namespace FlypackBot.Application.Commands
             var task1 = _userRepository.AddAsync(user, cancellationToken);
             var task2 = client.SendTextMessageAsync(
                 chatId: message.Chat,
-                text: $"¡Hola {message.From.FirstName}! He podido iniciar sesión con tu usuario, ahora me mantendré monitoreando el estado de tus paquetes.",
+                text: string.Format(L10n.strings.LoginWelcomeMessage, message.From.FirstName),
                 parseMode: ParseMode.Markdown,
                 cancellationToken: cancellationToken
             );
@@ -157,22 +156,22 @@ namespace FlypackBot.Application.Commands
         {
             var tasks = new List<Task>(6);
             tasks.Add(
-                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, $"{message.Text}\nListo, respuesta: *{answer}*", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
+                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, string.Format(L10n.strings.InlineQueryAnswerMessage, message.Text, answer), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
             );
-            if (answer == "denegar")
+            if (answer == L10n.strings.LoginAttemptDenyKeyword)
             {
                 tasks.AddRange(new[]
                 {
-                    client.SendTextMessageAsync(message.Chat, "⚠️ Te recomiendo que cambies tu contraseña tan pronto te sea posible.", cancellationToken: cancellationToken),
-                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, "Pues... tu intento de inicio de sesión no ha sido aprobado.", cancellationToken: cancellationToken),
+                    client.SendTextMessageAsync(message.Chat, L10n.strings.ChangeYourPasswordWarningMessage, cancellationToken: cancellationToken),
+                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, L10n.strings.DeniedLoginAttemptMessage, cancellationToken: cancellationToken),
                     _userRepository.UpdateUnauthorizedUsersAsync(user.Id, attemptingUser, cancellationToken)
                 });
             }
-            else if (answer == "permitir")
+            else if (answer == L10n.strings.LoginAttemptAllowKeyword)
             {
                 tasks.AddRange(new[]
                 {
-                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, "Tu inicio de sesión ha sido aprobado.", cancellationToken: cancellationToken),
+                    client.SendTextMessageAsync(attemptingUser.ChatIdentifier, L10n.strings.AllowedLoginAttemptMessage, cancellationToken: cancellationToken),
                     _userRepository.UpdateAuthorizedUsersAsync(user.Id, attemptingUser, cancellationToken)
                 });
             }
@@ -185,9 +184,9 @@ namespace FlypackBot.Application.Commands
 
             await Task.WhenAll(tasks);
 
-            if (answer != "permitir") return;
+            if (answer != L10n.strings.LoginAttemptAllowKeyword) return;
 
-            var cachedUser = (await _userCache.GetUserAsync(user.Id, cancellationToken)).User;
+            var cachedUser = await _userCache.GetLoggedUserAsync(user.Id, cancellationToken);
             cachedUser.AuthorizedUsers = cachedUser.AuthorizedUsers ?? new List<SecondaryUser>(1);
             cachedUser.AuthorizedUsers.Add(attemptingUser);
             _userCache.AddOrUpdate(cachedUser);
@@ -203,14 +202,14 @@ namespace FlypackBot.Application.Commands
             {
                 new []
                 {
-                    InlineKeyboardButton.WithCallbackData("Permitir", "permitir"),
-                    InlineKeyboardButton.WithCallbackData("Denegar", "denegar"),
+                    InlineKeyboardButton.WithCallbackData(L10n.strings.LoginAttemptAllowText, L10n.strings.LoginAttemptAllowKeyword),
+                    InlineKeyboardButton.WithCallbackData(L10n.strings.LoginAttemptDenyText, L10n.strings.LoginAttemptDenyKeyword),
                 }
             });
 
             var sent = await client.SendTextMessageAsync(
                 chatId: user.ChatIdentifier,
-                text: $"Hey {user.FirstName}, el usuario @{attemptingUser.Username ?? $"[{attemptingUser.FirstName}](tg://user?id={attemptingUser.Id})"} está tratando de iniciar sesión con tu cuenta de Flypack, ¿estás de acuerdo con esto?",
+                text: string.Format(L10n.strings.LoginAttemptRequestPermissionMessage, user.FirstName, "@" + attemptingUser.Username ?? $"[{attemptingUser.FirstName}](tg://user?id={attemptingUser.Id})"),
                 parseMode: ParseMode.Markdown,
                 replyMarkup: inlineKeyboard,
                 cancellationToken: cancellationToken

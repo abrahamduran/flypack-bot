@@ -5,18 +5,23 @@ using Telegram.Bot.Types;
 
 namespace FlypackBot.Domain.Models
 {
-    public class LoggedUser
+    public abstract class TelegramUser
+    {
+        public long Identifier { get; set; }
+        public long ChatIdentifier { get; set; }
+        public string FirstName { get; set; }
+        public string LanguageCode { get; set; }
+    }
+
+    public class LoggedUser : TelegramUser
     {
         [BsonId]
         [BsonElement("_id")]
         [BsonRepresentation(BsonType.ObjectId)]
         public string MongoId { get; set; }
-        public long Identifier { get; set; }
-        public long ChatIdentifier { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
         public string Salt { get; set; }
-        public string FirstName { get; set; }
 
         public ICollection<SecondaryUser> AuthorizedUsers { get; set; }
         public ICollection<SecondaryUser> UnauthorizedUsers { get; set; }
@@ -26,6 +31,7 @@ namespace FlypackBot.Domain.Models
         {
             Identifier = message.From.Id;
             ChatIdentifier = message.Chat.Id;
+            LanguageCode = message.From.LanguageCode;
             FirstName = message.From.FirstName;
             Username = username;
             Password = password;
@@ -33,10 +39,5 @@ namespace FlypackBot.Domain.Models
         }
     }
 
-    public class SecondaryUser
-    {
-        public long Identifier { get; set; }
-        public long ChatIdentifier { get; set; }
-        public string FirstName { get; set; }
-    }
+    public class SecondaryUser : TelegramUser { }
 }

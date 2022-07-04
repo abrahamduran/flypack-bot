@@ -17,8 +17,10 @@ namespace FlypackBot
 {
     public class Worker : BackgroundService
     {
+        private readonly Timer _timer;
         private readonly ILogger<Worker> _logger;
         private readonly ChatSessionService _session;
+        private readonly UserCacheService _userCache;
         private readonly FlypackService _flypack;
         private readonly TelegramSettings _settings;
         private readonly TelegramBotClient _telegram;
@@ -34,7 +36,7 @@ namespace FlypackBot
         private readonly IServiceProvider _serviceProvider;
 
         public Worker(
-            FlypackService flypack, ChatSessionService session, StartCommand startCommand,
+            FlypackService flypack, ChatSessionService session, UserCacheService userCache, StartCommand startCommand,
             StopCommand stopCommand, PackagesCommand packagesCommand, UpdatePasswordCommand updatePasswordCommand,
             PackageNotificationParser parser, IOptions<TelegramSettings> settings, ILogger<Worker> logger)
         {
@@ -43,31 +45,53 @@ namespace FlypackBot
             _settings = settings.Value;
             _flypack = flypack;
             _session = session;
+            _userCache = userCache;
             _startCommand = startCommand;
             _stopCommand = stopCommand;
             _packagesCommand = packagesCommand;
             _updatePasswordCommand = updatePasswordCommand;
             _telegram = new TelegramBotClient(_settings.AccessToken);
+            _timer = new Timer(async (state) => { await StoreChanges(); });
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             await _session.LoadAsync(cancellationToken);
 
+            await _telegram.SetMyCommandsAsync(L10nCommands.Spanish, null, "es", cancellationToken);
+            await _telegram.SetMyCommandsAsync(L10nCommands.English, null, "en", cancellationToken);
+            await _telegram.SetMyCommandsAsync(L10nCommands.French, null, "fr", cancellationToken);
+
             //Telegram
             var allowed = new[] { UpdateType.Message,/* UpdateType.ChannelPost,*/ UpdateType.InlineQuery, UpdateType.CallbackQuery };
             var receiverOptions = new ReceiverOptions() { AllowedUpdates = allowed };
-            _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _settings, _startCommand, _stopCommand, _packagesCommand, _updatePasswordCommand, _parser, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
+            _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _userCache, _settings, _startCommand, _stopCommand, _packagesCommand, _updatePasswordCommand, _parser, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
 
             // Flypack
-            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, HandleExceptionAsync, _logger), cancellationToken);
+            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, _userCache, HandleExceptionAsync, _logger), cancellationToken);
+
+            // Store Changes Periodically
+            _timer?.Change(TimeSpan.FromHours(1), TimeSpan.FromHours(1));
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("Gracefully stopped this mf");
-            await _session.StoreAsync(cancellationToken);
+            _timer?.Change(Timeout.Infinite, 0);
+            await StoreChanges(cancellationToken);
             await base.StopAsync(cancellationToken);
+        }
+
+        private async Task StoreChanges(CancellationToken token = default)
+        {
+            try
+            {
+                await Task.WhenAll(_userCache.StoreAsync(token), _session.StoreAsync(token));
+            }
+            catch (Exception ex)
+            {
+                await HandleExceptionAsync(ex, token);
+            }
         }
 
         private async Task HandleExceptionAsync(Exception exception, CancellationToken cancellationToken)

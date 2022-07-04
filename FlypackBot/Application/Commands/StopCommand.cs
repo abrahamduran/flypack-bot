@@ -34,7 +34,7 @@ namespace FlypackBot.Application.Commands
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Pero... yo ni si quiera te conozco. ಠ_ಠ",
+                    text: L10n.strings.DontKnowYouMessage,
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
@@ -46,14 +46,14 @@ namespace FlypackBot.Application.Commands
             {
                 new []
                 {
-                    InlineKeyboardButton.WithCallbackData("Sí", "si"),
-                    InlineKeyboardButton.WithCallbackData("No", "no"),
+                    InlineKeyboardButton.WithCallbackData(L10n.strings.YesText, L10n.strings.YesKeyword),
+                    InlineKeyboardButton.WithCallbackData(L10n.strings.NoText, L10n.strings.NoKeyword),
                 }
             });
 
             var sent = await client.SendTextMessageAsync(
                 chatId: message.Chat,
-                text: "¿Estás seguro que quieres detener el bot?",
+                text: L10n.strings.StopBotConfirmationMessage,
                 replyMarkup: inlineKeyboard,
                 cancellationToken: cancellationToken
             );
@@ -65,14 +65,14 @@ namespace FlypackBot.Application.Commands
         {
             var tasks = new List<Task>(2);
             tasks.Add(
-                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, $"{message.Text}\nListo, respuesta: *{answer}*", parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
+                client.EditMessageTextAsync(message.Chat.Id, message.MessageId, string.Format(L10n.strings.InlineQueryAnswerMessage, message.Text, answer), parseMode: ParseMode.Markdown, cancellationToken: cancellationToken)
             );
             tasks.Add(_session.RemoveAsync(message.Chat.Id, cancellationToken));
 
-            if (answer != "si") { await Task.WhenAll(tasks); return; }
+            if (answer != L10n.strings.YesKeyword) { await Task.WhenAll(tasks); return; }
 
             tasks.Add(
-                client.SendTextMessageAsync(message.Chat.Id, "A partir de este momento ya no recibirás más notificaciones sobre tus paquetes. De igual forma, la información relacionada a tu usuario ha sido eliminada.", cancellationToken: cancellationToken)
+                client.SendTextMessageAsync(message.Chat.Id, L10n.strings.StoppedBotMessage, cancellationToken: cancellationToken)
             );
 
             var user = await _userRepository.GetByIdentifierAsync(from.Id, cancellationToken);
@@ -90,7 +90,7 @@ namespace FlypackBot.Application.Commands
                 tasks.Add(_packagesRepository.DeleteByUsernameAsync(user.Username, cancellationToken));
                 if (user.AuthorizedUsers?.Any() == true)
                     tasks.Add(
-                        client.SendTextMessageAsync(message.Chat.Id, "Así mismo, los usuarios que has autorizado previamente han sido removidos y dejarán de recibir notificaciones.", cancellationToken: cancellationToken)
+                        client.SendTextMessageAsync(message.Chat.Id, L10n.strings.StoppedBotFollowUpMessage, cancellationToken: cancellationToken)
                     );
 
                 foreach (var authorizedUser in user.AuthorizedUsers)
@@ -98,9 +98,7 @@ namespace FlypackBot.Application.Commands
                     tasks.Add(
                         client.SendTextMessageAsync(
                             authorizedUser.ChatIdentifier,
-                            $"A partir de este momento ya no recibirás más notificaciones sobre los paquetes asociados a la cuenta FLY-{user.Username}. "
-                            + "El usuario que se ha logueado previamente ha detenido las funciones del bot.\n"
-                            + "Si deseas, puedes iniciar sesión usando el comando /start.",
+                            string.Format(L10n.strings.StoppedBotAuthorizedUsersMessage, user.Username),
                             cancellationToken: cancellationToken
                         )
                     );

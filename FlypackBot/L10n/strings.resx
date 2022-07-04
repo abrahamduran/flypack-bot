@@ -1,0 +1,159 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<!-- Texts -->
+	<data name="InlineQueryAnswerMessage">
+		<value>{0}\nListo, respuesta: *{1}*</value>
+    </data>
+
+	<!-- Start Command Texts -->
+	<data name="DontKnowYouMessage">
+		<value>"Do I know you? ಠ_ಠ"</value>
+    </data>
+
+	<data name="WeHaveAlreadyMetMessage">
+		<value>It seems to me that we have already been through this, perhaps you have already sent that command before. _Déjà vu_</value>
+    </data>
+	
+	<data name="WelcomeMessage">
+		<value>Hello! As you may already know, this bot will help you with the tracking of your [Flypack](https://www.flypack.com.do) packages.\n_This bot does not have any legal relationship with the company Flypack or its associates._</value>
+    </data>
+	
+	<data name="SendUsernameAndPasswordMessage">
+		<value>Please send me your username and password, so I can monitor your packages and their status. Don't worry, I'll keep your credentials safe.\n\nSend them this way: _username, password_.</value>
+    </data>
+	
+	<data name="SendUsernameAndPasswordSecondMessage">
+		<value>Please send me your username and password.\n\nSend them like this: *username, password*, using a comma (,) in between.</value>
+    </data>
+	
+	<data name="WrongUsernameAndPasswordMessage">
+		<value>*Wrong username and password*\nPlease send me your username and password one more time.\n\nSend them this way: _username, password_.</value>
+    </data>
+
+	<data name="UsernameAndPasswordPlaceholder">
+		<value>username, password</value>
+    </data>
+	
+	<data name="AlreadyLoggedInWithThatAccountMessage">
+		<value>Hmm... odd, apparently someone has already logged in with that account. Give me some time while I figure this out.</value>
+    </data>
+	
+	<data name="LoginWelcomeMessage">
+		<value>Hi {0}! I was able to log in with your user, now I will monitor the status of your packages.</value>
+    </data>
+	
+	<data name="LoginAttemptRequestPermissionMessage">
+		<value>Hey {0}, the user {1} is trying to login with your Flypack account, are you ok with this?</value>
+    </data>
+
+	<data name="DeniedLoginAttemptMessage">
+		<value>Sorry... your login attempt was denied.</value>
+    </data>
+	
+	<data name="AllowedLoginAttemptMessage">
+		<value>Your login attempt has been approved.</value>
+    </data>
+
+	<data name="LoginAttemptAllowText">
+		<value>Allow</value>
+    </data>
+	
+	<data name="LoginAttemptDenyText">
+		<value>Deny</value>
+    </data>
+	
+	<data name="LoginAttemptAllowKeyword">
+		<value>allow</value>
+    </data>
+	
+	<data name="LoginAttemptDenyKeyword">
+		<value>deny</value>
+    </data>
+	
+	<data name="ChangeYourPasswordWarningMessage">
+		<value>⚠️ I would advise you to change your password as soon as possible.</value>
+    </data>
+	
+	<!-- Stop Command Texts -->
+	<data name="StopBotConfirmationMessage">
+		<value>Are you sure you want to stop the bot?</value>
+    </data>
+	
+	<data name="StoppedBotMessage">
+		<value>From this moment you will no longer receive notifications about your packages. At the same time, the information related to your user has been deleted.</value>
+    </data>
+	
+	<data name="StoppedBotFollowUpMessage">
+		<value>Also, the users that you have previously authorized have been removed and will no longer receive notifications.</value>
+    </data>
+	
+	<data name="StoppedBotAuthorizedUsersMessage">
+		<value>From this moment you will no longer receive notifications about the packages associated with the FLY-{0} account. The original logged in user has stopped the bot's functions.\nYou can log in yourself using the /start command.</value>
+    </data>
+
+	<data name="YesKeyword">
+		<value>yes</value>
+    </data>
+
+	<data name="YesText">
+		<value>Yes</value>
+    </data>
+	
+	<data name="NoKeyword">
+		<value>no</value>
+    </data>
+
+	<data name="NoText">
+		<value>No</value>
+    </data>
+
+	<!-- Packages Command Texts -->
+	<data name="EmptyPackageListMessage">
+		<value>Empty packages list 📭</value>
+	</data>
+
+	<data name="PackageStatus">
+		<value>Packages Status</value>
+    </data>
+
+	<data name="PackagesInProcessMessage">
+		<value>You have {0} packages in process</value>
+    </data>
+	
+	<data name="DescriptionField">
+		<value>Description</value>
+    </data>
+	
+	<data name="TrackingField">
+		<value>Tracking</value>
+    </data>
+	
+	<data name="ReceivedByField">
+		<value>Received by</value>
+    </data>
+	
+	<data name="WeightField">
+		<value>Weight</value>
+    </data>
+	
+	<data name="StatusField">
+		<value>Status</value>
+    </data>
+	
+	<data name="PoundsText">
+		<value>lb</value>
+    </data>
+
+	<!-- Change Password Texts -->
+	<data name="EmptyPasswordMessage">
+		<value>Your new password cannot be a blank message. 😑</value>
+    </data>
+
+	<data name="WrongPasswordMessage">
+		<value>The new password is incorrect. 🥴"</value>
+    </data>
+
+	<data name="UpdatedPasswordMessage">
+		<value>The password has been updated. 🎉</value>
+    </data>
+</root>

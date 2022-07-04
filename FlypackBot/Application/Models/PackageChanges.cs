@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using FlypackBot.Domain.Models;
 
 namespace FlypackBot.Application.Models
@@ -11,8 +12,8 @@ namespace FlypackBot.Application.Models
 
         public static PackageChanges Empty => new PackageChanges
         {
-            Updates = new Package[0],
-            Deletes = new Package[0],
+            Updates = Array.Empty<Package>(),
+            Deletes = Array.Empty<Package>(),
             Previous = new Dictionary<string, Package>()
         };
     }

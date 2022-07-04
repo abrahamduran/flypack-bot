@@ -24,5 +24,31 @@
     <Folder Include="Domain\Models\" />
     <Folder Include="Application\Models\" />
     <Folder Include="Application\Handlers\" />
+    <Folder Include="L10n\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="L10n\strings.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="L10n\strings.es.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.es.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="L10n\strings.fr.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>strings.fr.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="L10n\strings.Designer.cs">
+      <DependentUpon>strings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="L10n\strings.es.Designer.cs">
+      <DependentUpon>strings.es.resx</DependentUpon>
+    </Compile>
+    <Compile Update="L10n\strings.fr.Designer.cs">
+      <DependentUpon>strings.fr.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

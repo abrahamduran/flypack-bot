@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,7 @@ namespace FlypackBot.Application.Handlers
         private readonly FlypackService _flypack;
         private readonly TelegramSettings _settings;
         private readonly ChatSessionService _session;
+        private readonly UserLanguageUpdater _updater;
         private readonly PackageNotificationParser _parser;
         private readonly Func<Exception, CancellationToken, Task> _errorHandler;
 
@@ -31,11 +33,12 @@ namespace FlypackBot.Application.Handlers
         private readonly PackagesCommand _packagesCommand;
         private readonly UpdatePasswordCommand _updatePasswordCommand;
 
-        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, TelegramSettings settings, StartCommand startCommand, StopCommand stopCommand, PackagesCommand packagesCommand, UpdatePasswordCommand updatePasswordCommand, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
+        public TelegramUpdateHandler(FlypackService flypack, ChatSessionService session, UserLanguageUpdater updater, TelegramSettings settings, StartCommand startCommand, StopCommand stopCommand, PackagesCommand packagesCommand, UpdatePasswordCommand updatePasswordCommand, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
         {
             _parser = parser;
             _session = session;
             _flypack = flypack;
+            _updater = updater;
             _settings = settings;
             _errorHandler = errorHandler;
             _logger = logger;
@@ -48,16 +51,8 @@ namespace FlypackBot.Application.Handlers
 
         public Task HandleUpdateAsync(ITelegramBotClient client, Update update, CancellationToken cancellationToken)
         {
-            var userId = update.Message?.From.Id ?? update.InlineQuery?.From.Id ?? update.CallbackQuery.From?.Id;
-            var channelId = update.ChannelPost?.Chat.Id;
-            var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
-            if (update.ChannelPost != null && isUnauthorizedChannel)
-            {
-                var username = update.Message?.From.Username ?? update.InlineQuery?.From.Username;
-                var channelName = update.ChannelPost?.Chat.Title;
-                _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}, channel: {ChannelId}: {ChannelName}", userId, username, channelId, channelName);
-                return Task.CompletedTask;
-            }
+            var user = update.Message?.From ?? update.InlineQuery?.From ?? update.CallbackQuery?.From ?? update.ChannelPost?.From;
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo(user?.LanguageCode ?? "en");
 
             var handler = update.Type switch
             {
@@ -70,13 +65,29 @@ namespace FlypackBot.Application.Handlers
 
             Task.Run(async () =>
             {
-                try
+                var userId = user?.Id ?? 0L;
+                var channelId = update.ChannelPost?.Chat.Id;
+                var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
+                if (update.ChannelPost != null && isUnauthorizedChannel)
                 {
-                    await handler;
+                    var username = user?.Username ?? "null";
+                    var channelName = update.ChannelPost?.Chat.Title;
+                    _logger.LogWarning("Received message from an unauthorized user. User ID: {UserId}, username: {Username}, channel: {ChannelId}: {ChannelName}", userId, username, channelId, channelName);
                 }
-                catch (Exception exception)
+                else
                 {
-                    await HandleErrorAsync(client, exception, cancellationToken);
+                    try
+                    {
+                        await Task.WhenAll(new[]
+                        {
+                            handler,
+                            _updater.UpdateIfNeededAsync(user.Id, user.LanguageCode, cancellationToken)
+                        });
+                    }
+                    catch (Exception exception)
+                    {
+                        await HandleErrorAsync(client, exception, cancellationToken);
+                    }
                 }
             }, cancellationToken);
 
@@ -114,14 +125,16 @@ namespace FlypackBot.Application.Handlers
             var command = message.Text
                 .Replace('@', ' ')
                 .Split(' ')
-                .First();
+                .First()
+                .Replace("/", "");
 
-            return command switch
+            return L10nCommands.Normalize(command) switch
             {
                 "/start" => _startCommand.Handle(client, message, cancellationToken),
-                "/paquetes" => _packagesCommand.Handle(client, message, cancellationToken),
-                "/cambiar_clave" => _updatePasswordCommand.Handle(client, message, cancellationToken),
+                "/packages" => _packagesCommand.Handle(client, message, cancellationToken),
+                "/change_password" => _updatePasswordCommand.Handle(client, message, cancellationToken),
                 "/stop" => _stopCommand.Handle(client, message, cancellationToken),
+                "/psa" => Task.CompletedTask,
                 _ => Task.Run(() =>
                 {
                     _logger.LogWarning("Unrecognized command send by user {User}. Command: {Command}", message.From, command);
@@ -152,7 +165,7 @@ namespace FlypackBot.Application.Handlers
 
             if (packages == null)
             {
-                await client.AnswerInlineQueryAsync(message.Id, new InlineQueryResultArticle[0], cancellationToken: cancellationToken);
+                await client.AnswerInlineQueryAsync(message.Id, Array.Empty<InlineQueryResultArticle>(), cancellationToken: cancellationToken);
                 return;
             }
 
@@ -164,7 +177,7 @@ namespace FlypackBot.Application.Handlers
 
                 return new InlineQueryResultArticle(x.Identifier, x.Description, content)
                 {
-                    Description = $"{x.Status}\n{x.Weight} libras"
+                    Description = $"{x.Status}\n{x.Weight} {L10n.strings.PoundsText}"
                 };
             })
             .ToList();

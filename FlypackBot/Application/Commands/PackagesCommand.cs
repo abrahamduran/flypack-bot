@@ -33,18 +33,25 @@ namespace FlypackBot.Application.Commands
         public async Task Handle(ITelegramBotClient client, Message message, CancellationToken cancellationToken)
         {
             var user = await _userCache.GetUserAsync(message.From.Id, cancellationToken);
-            if (user.User is null)
+            if (user is null)
             {
                 await client.SendTextMessageAsync(
                     chatId: message.Chat,
-                    text: "Pero... yo ni si quiera te conozco. ಠ_ಠ",
+                    text: L10n.strings.DontKnowYouMessage,
                     replyToMessageId: message.MessageId,
                     cancellationToken: cancellationToken
                 );
                 return;
             }
-            var packages = await _flypack.LoginAndFetchPackagesAsync(user.User.Username, _decrypter.Decrypt(user.User.Password, user.User.Salt));
-            await SendPackagesToChat(client, packages, message.Chat.Id, cancellationToken);
+
+            if (user is SecondaryUser secondaryUser)
+                user = await _userCache.GetLoggedUserAsync(secondaryUser, cancellationToken);
+
+            if (user is LoggedUser loggedUser)
+            {
+                var packages = await _flypack.LoginAndFetchPackagesAsync(loggedUser.Username, _decrypter.Decrypt(loggedUser.Password, loggedUser.Salt));
+                await SendPackagesToChat(client, packages, message.Chat.Id, cancellationToken);
+            }
         }
 
         private async Task SendPackagesToChat(ITelegramBotClient client, IEnumerable<Package> packages, long channel, CancellationToken cancellationToken)
