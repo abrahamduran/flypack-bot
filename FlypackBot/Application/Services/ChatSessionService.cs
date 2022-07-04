@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Domain.Models;
@@ -68,7 +69,12 @@ namespace FlypackBot.Application.Services
                 _sessions[session.ChatIdentifier] = session;
         }
 
-        public Task StoreAsync(CancellationToken cancellationToken = default) =>
-            _repository.UpsertAsync(_sessions.Values, cancellationToken);
+        public Task StoreAsync(CancellationToken cancellationToken = default)
+        {
+            if (_sessions.Any())
+                return _repository.UpsertAsync(_sessions.Values, cancellationToken);
+
+            return Task.CompletedTask;
+        }
     }
 }

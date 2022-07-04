@@ -122,8 +122,13 @@ namespace FlypackBot.Application.Services
             _secondaryUsers.Remove(identifier);
         }
 
-        public Task StoreAsync(CancellationToken cancellationToken = default) =>
-            _repository.UpdateAsync(_loggedUsers.Values, cancellationToken);
+        public Task StoreAsync(CancellationToken cancellationToken = default)
+        {
+            if (_loggedUsers.Any())
+                return _repository.UpdateAsync(_loggedUsers.Values, cancellationToken);
+
+            return Task.CompletedTask;
+        }
 
         private async Task FetchUsers(CancellationToken cancellationToken)
         {
