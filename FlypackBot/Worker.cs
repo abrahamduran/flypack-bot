@@ -35,7 +35,7 @@ namespace FlypackBot
         private readonly IServiceProvider _serviceProvider;
 
         public Worker(
-            FlypackService flypack, ChatSessionService session, StartCommand startCommand,
+            FlypackService flypack, ChatSessionService session, UserCacheService userCache, StartCommand startCommand,
             StopCommand stopCommand, PackagesCommand packagesCommand, UpdatePasswordCommand updatePasswordCommand,
             PackageNotificationParser parser, IOptions<TelegramSettings> settings, ILogger<Worker> logger)
         {
@@ -44,6 +44,7 @@ namespace FlypackBot
             _settings = settings.Value;
             _flypack = flypack;
             _session = session;
+            _userCache = userCache;
             _startCommand = startCommand;
             _stopCommand = stopCommand;
             _packagesCommand = packagesCommand;

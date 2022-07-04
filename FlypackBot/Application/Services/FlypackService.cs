@@ -18,7 +18,7 @@ namespace FlypackBot.Application.Services
     {
         private const int MAX_RETRIES = 3;
         private IDictionary<string, IEnumerable<Package>> _currentPackages;
-        private IDictionary<string, IEnumerable<long>> _channels = new Dictionary<string, IEnumerable<long>>();
+        private IDictionary<string, IEnumerable<LanguageAndChannels>> _channels = new Dictionary<string, IEnumerable<LanguageAndChannels>>();
         private IDictionary<string, string> _paths = new Dictionary<string, string>();
 
         private readonly ILogger<FlypackService> _logger;
@@ -106,9 +106,9 @@ namespace FlypackBot.Application.Services
         private async Task UpdateUsersPathsAndChannels(IEnumerable<UserAndChannels> users, CancellationToken cancellationToken)
         {
             var tasks = new List<Task>();
-            foreach (var item in users)
+            foreach (var user in users)
             {
-                var task = UpdateUserPathAndChannels(item, cancellationToken);
+                var task = UpdateUserPathAndChannels(user, cancellationToken);
                 tasks.Add(task);
             }
 

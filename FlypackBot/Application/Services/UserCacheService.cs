@@ -20,6 +20,7 @@ namespace FlypackBot.Application.Services
 
     public class UserCacheService : UserLanguageProvider, UserLanguageUpdater
     {
+        private const string DEFAULT_LANGUAGE = "en";
         private IDictionary<long, LoggedUser> _loggedUsers = new Dictionary<long, LoggedUser>();
         private IDictionary<long, SecondaryUser> _secondaryUsers = new Dictionary<long, SecondaryUser>();
         private readonly UserRepository _repository;
@@ -71,15 +72,21 @@ namespace FlypackBot.Application.Services
                     new UserAndChannels
                     {
                         User = x,
-                        Channels = (x.AuthorizedUsers?.Select(a => a.ChatIdentifier) ?? new List<long>(1))
-                            .Append(x.ChatIdentifier)
+                        Channels = (x.AuthorizedUsers ?? new List<SecondaryUser>(1))
+                            .Append(new SecondaryUser { LanguageCode = x.LanguageCode, ChatIdentifier = x.ChatIdentifier })
+                            .GroupBy(g => g.LanguageCode ?? DEFAULT_LANGUAGE)
+                            .Select(a => new LanguageAndChannels
+                            {
+                                LanguageCode = a.Key,
+                                Channels = a.Select(s => s.ChatIdentifier)
+                            })
                             .ToList()
                     }
                 );
         }
 
         public async Task<string> GetUserLanguageCodeAsync(long identifier, CancellationToken cancellationToken) =>
-            (await GetUserAsync(identifier, cancellationToken))?.LanguageCode ?? "en";
+            (await GetUserAsync(identifier, cancellationToken))?.LanguageCode ?? DEFAULT_LANGUAGE;
 
         public async Task UpdateIfNeededAsync(long identifier, string languageCode, CancellationToken cancellationToken)
         {
@@ -120,7 +127,7 @@ namespace FlypackBot.Application.Services
 
         private async Task FetchUsers(CancellationToken cancellationToken)
         {
-            var users = await _repository.GetListAsync(x => true, cancellationToken);
+            var users = (await _repository.GetListAsync(x => true, cancellationToken)).ToList();
             if (users == null) return;
 
             _loggedUsers = users

@@ -36,8 +36,16 @@ namespace FlypackBot.Application.Handlers
         public Task HandleUpdateAsync(PackageUpdate update, CancellationToken cancellationToken)
         {
             // TODO: Each call to ParseMessageFor needs to be localized for each user
-            var message = _parser.ParseMessageFor(update.Updates, update.Previous, true);
-            return SendMessageToChats(message, update.Channels, cancellationToken);
+            var tasks = new List<Task>(update.Channels.Count());
+
+            foreach (var channel in update.Channels)
+            {
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo(channel.LanguageCode);
+                var message = _parser.ParseMessageFor(update.Updates, update.Previous, true);
+                tasks.Add(SendMessageToChats(message, channel.Channels, cancellationToken));
+            }
+
+            return Task.WhenAll(tasks);
         }
 
         public Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
