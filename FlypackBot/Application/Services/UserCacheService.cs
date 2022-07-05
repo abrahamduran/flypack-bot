@@ -49,7 +49,10 @@ namespace FlypackBot.Application.Services
             if (user is SecondaryUser secondary)
                 return await GetLoggedUserAsync(secondary, cancellationToken);
 
-            return user as LoggedUser;
+            if (user is LoggedUser loggedUser)
+                return loggedUser;
+
+            return null;
         }
 
         public async Task<LoggedUser> GetLoggedUserAsync(SecondaryUser user, CancellationToken cancellationToken)
@@ -91,6 +94,8 @@ namespace FlypackBot.Application.Services
         public async Task UpdateIfNeededAsync(long identifier, string languageCode, CancellationToken cancellationToken)
         {
             var cached = await GetUserAsync(identifier, cancellationToken);
+
+            if (cached is null) return;
 
             if (cached.LanguageCode != languageCode)
             {
