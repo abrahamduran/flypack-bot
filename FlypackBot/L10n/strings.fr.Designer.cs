@@ -247,7 +247,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Veuillez m&apos;envoyer votre nom d&apos;utilisateur et votre mot de passe, afin que je puisse surveiller vos colis et leur statut. Ne vous inquiétez pas, je garderai vos informations d&apos;identification en sécurité.\n\nEnvoyez-les de cette façon : _nom d&apos;utilisateur_, _mot de passe_..
+        ///   Looks up a localized string similar to Veuillez m&apos;envoyer votre nom d&apos;utilisateur et votre mot de passe, afin que je puisse surveiller vos colis et leur statut. Ne vous inquiétez pas, je garderai vos informations d&apos;identification en sécurité.\n\nEnvoyez-les de cette façon : _nom d&apos;utilisateur, mot de passe_.
         /// </summary>
         internal static string SendUsernameAndPasswordMessage {
             get {
@@ -373,7 +373,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to *Nom d&apos;utilisateur et mot de passe erronés*\nVeuillez m&apos;envoyer votre nom d&apos;utilisateur et votre mot de passe une fois de plus.\n\nEnvoyez-les de cette façon : _nom d&apos;utilisateur_, _mot de passe_..
+        ///   Looks up a localized string similar to *Nom d&apos;utilisateur et mot de passe erronés*\nVeuillez m&apos;envoyer votre nom d&apos;utilisateur et votre mot de passe une fois de plus.\n\nEnvoyez-les de cette façon : _nom d&apos;utilisateur, mot de passe_.
         /// </summary>
         internal static string WrongUsernameAndPasswordMessage {
             get {

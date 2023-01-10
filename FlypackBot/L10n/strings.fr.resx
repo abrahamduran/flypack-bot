@@ -19,7 +19,7 @@
     </data>
 	
 	<data name="SendUsernameAndPasswordMessage">
-		<value>Veuillez m'envoyer votre nom d'utilisateur et votre mot de passe, afin que je puisse surveiller vos colis et leur statut. Ne vous inquiétez pas, je garderai vos informations d'identification en sécurité.\n\nEnvoyez-les de cette façon : _nom d'utilisateur_, _mot de passe_.</value>
+		<value>Veuillez m'envoyer votre nom d'utilisateur et votre mot de passe, afin que je puisse surveiller vos colis et leur statut. Ne vous inquiétez pas, je garderai vos informations d'identification en sécurité.\n\nEnvoyez-les de cette façon : _nom d'utilisateur, mot de passe_</value>
     </data>
 	
 	<data name="SendUsernameAndPasswordSecondMessage">
@@ -27,7 +27,7 @@
     </data>
 	
 	<data name="WrongUsernameAndPasswordMessage">
-		<value>*Nom d'utilisateur et mot de passe erronés*\nVeuillez m'envoyer votre nom d'utilisateur et votre mot de passe une fois de plus.\n\nEnvoyez-les de cette façon : _nom d'utilisateur_, _mot de passe_.</value>
+		<value>*Nom d'utilisateur et mot de passe erronés*\nVeuillez m'envoyer votre nom d'utilisateur et votre mot de passe une fois de plus.\n\nEnvoyez-les de cette façon : _nom d'utilisateur, mot de passe_</value>
     </data>
 
 	<data name="UsernameAndPasswordPlaceholder">

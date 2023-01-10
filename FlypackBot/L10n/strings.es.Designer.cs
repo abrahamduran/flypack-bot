@@ -247,7 +247,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_..
+        ///   Looks up a localized string similar to Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_ .
         /// </summary>
         internal static string SendUsernameAndPasswordMessage {
             get {
@@ -373,7 +373,7 @@ namespace FlypackBot.L10n {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to *Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_..
+        ///   Looks up a localized string similar to *Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_.
         /// </summary>
         internal static string WrongUsernameAndPasswordMessage {
             get {

@@ -19,7 +19,7 @@
     </data>
 	
 	<data name="SendUsernameAndPasswordMessage">
-		<value>Please send me your username and password, so I can monitor your packages and their status. Don't worry, I'll keep your credentials safe.\n\nSend them this way: _username, password_.</value>
+		<value>Please send me your username and password, so I can monitor your packages and their status. Don't worry, I'll keep your credentials safe.\n\nSend them this way: _username, password_</value>
     </data>
 	
 	<data name="SendUsernameAndPasswordSecondMessage">
@@ -27,7 +27,7 @@
     </data>
 	
 	<data name="WrongUsernameAndPasswordMessage">
-		<value>*Wrong username and password*\nPlease send me your username and password one more time.\n\nSend them this way: _username, password_.</value>
+		<value>*Wrong username and password*\nPlease send me your username and password one more time.\n\nSend them this way: _username, password_</value>
     </data>
 
 	<data name="UsernameAndPasswordPlaceholder">

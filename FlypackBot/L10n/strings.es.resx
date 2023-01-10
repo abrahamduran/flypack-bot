@@ -19,7 +19,7 @@
     </data>
 
 	<data name="SendUsernameAndPasswordMessage">
-		<value>Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_.</value>
+		<value>Por favor, mándame tu usuario y contraseña; así podré revisar tus paquetes y sus estados. No te preocupes, mantendre tus credenciales bien seguras.\n\nMándalos de esta forma: _usuario, contraseña_ </value>
     </data>
 
 	<data name="SendUsernameAndPasswordSecondMessage">
@@ -27,7 +27,7 @@
     </data>
 
 	<data name="WrongUsernameAndPasswordMessage">
-		<value>*Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_.</value>
+		<value>*Usuario y contraseña incorrectos*\nPor favor, mándame tu usuario y contraseña una vez más.\n\nMándalos de esta forma: _usuario, contraseña_</value>
     </data>
 
 	<data name="UsernameAndPasswordPlaceholder">
