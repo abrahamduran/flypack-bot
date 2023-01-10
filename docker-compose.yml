@@ -1,9 +1,8 @@
 version: '3.4'
 
 services:
-  flypack.bot:
+  flypackbot:
     image: ${DOCKER_REGISTRY-}flypackbot
-    container_name: flypack.bot
     build:
       context: .
       dockerfile: FlypackBot/Dockerfile
@@ -21,9 +20,8 @@ services:
       - MongoDb__DatabaseName=${MONGO_INITDB_DATABASE}
       - MongoDb__ConnectionString=${MONGO_CONNECTION_STRING}
 
-  flypack.db:
+  flypackdb:
     image: mongo:latest
-    container_name: flypack.db
     environment:
       TZ: ${TIMEZONE}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
