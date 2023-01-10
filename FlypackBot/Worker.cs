@@ -76,7 +76,7 @@ namespace FlypackBot
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Gracefully stopped this mf");
+            _logger.LogDebug("Gracefully stopped this mf");
             _timer?.Change(Timeout.Infinite, 0);
             await StoreChanges(cancellationToken);
             await base.StopAsync(cancellationToken);
