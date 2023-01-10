@@ -144,6 +144,7 @@ namespace FlypackBot.Application.Services
                 .ToDictionary(x => x.Identifier, x => x);
 
             _secondaryUsers = users
+                .Where(x => x.AuthorizedUsers is not null)
                 .SelectMany(x => x.AuthorizedUsers)
                 .ToDictionary(x => x.Identifier, x => x);
         }
