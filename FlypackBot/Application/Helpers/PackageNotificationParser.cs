@@ -24,8 +24,10 @@ namespace FlypackBot.Application.Helpers
             if (packages == null || !packages.Any())
                 return L10n.strings.EmptyPackageListMessage;
 
-            var messages = new List<string>();
-            messages.Add($"*{L10n.strings.PackageStatus}*");
+            var messages = new List<string>
+            {
+                $"*{L10n.strings.PackageStatus}*"
+            };
             if (packages.Count() > SIMPLE_PACKAGES_AMOUNT && !isUpdate)
                 messages.Add($"_{string.Format(L10n.strings.PackagesInProcessMessage, packages.Count())}_");
 
