@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using FlypackBot.Application.Helpers;
@@ -94,6 +95,8 @@ namespace FlypackBot.Application.Commands
                 _session.Add(sent, message.From.Id, SessionScope.Login);
                 return;
             }
+            // Sanitize username, since we only need the numbers. This removes the FLY- prefix
+            credentials[0] = Regex.Match(credentials[0], @"\d+").Value;
 
             var validCredentials = await _flypack.TestCredentialsAsync(credentials[0], credentials[1]);
             if (validCredentials == false)

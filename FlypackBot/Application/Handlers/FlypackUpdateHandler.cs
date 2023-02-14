@@ -20,15 +20,13 @@ namespace FlypackBot.Application.Handlers
         private readonly TelegramSettings _settings;
         private readonly ITelegramBotClient _telegram;
         private readonly PackageNotificationParser _parser;
-        private readonly UserLanguageProvider _languageProvider;
         private readonly Func<Exception, CancellationToken, Task> _errorHandler;
 
-        public FlypackUpdateHandler(ITelegramBotClient telegram, TelegramSettings settings, PackageNotificationParser parser, UserLanguageProvider languageProvider, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
+        public FlypackUpdateHandler(ITelegramBotClient telegram, TelegramSettings settings, PackageNotificationParser parser, Func<Exception, CancellationToken, Task> errorHandler, ILogger logger)
         {
             _parser = parser;
             _telegram = telegram;
             _settings = settings;
-            _languageProvider = languageProvider;
             _errorHandler = errorHandler;
             _logger = logger;
         }

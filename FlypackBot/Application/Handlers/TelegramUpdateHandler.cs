@@ -68,7 +68,7 @@ namespace FlypackBot.Application.Handlers
                 var userId = user?.Id ?? 0L;
                 var channelId = update.ChannelPost?.Chat.Id;
                 var isUnauthorizedChannel = channelId != _settings.ChannelIdentifier;
-                if (update.ChannelPost != null && isUnauthorizedChannel)
+                if (update.ChannelPost is not null && isUnauthorizedChannel)
                 {
                     var username = user?.Username ?? "null";
                     var channelName = update.ChannelPost?.Chat.Title;
@@ -146,12 +146,12 @@ namespace FlypackBot.Application.Handlers
         private Task OnCallbackQueryReceived(ITelegramBotClient client, CallbackQuery callbackQuery, CancellationToken cancellationToken)
         {
             var session = _session.Get(callbackQuery.Message.Chat.Id);
-            if (session == null) return Task.CompletedTask;
+            if (session is null) return Task.CompletedTask;
 
-            if (session.Scope == SessionScope.LoginAttempt && session.AttemptingUser != null)
+            if (session.Scope is SessionScope.LoginAttempt && session.AttemptingUser is not null)
                 return _startCommand.AnswerLoginAttemptNotification(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, session.AttemptingUser, cancellationToken);
 
-            if (session.Scope == SessionScope.Stop)
+            if (session.Scope is SessionScope.Stop)
                 return _stopCommand.AnswerInlineKeyboard(client, callbackQuery.From, callbackQuery.Message, callbackQuery.Data, cancellationToken);
 
             return Task.CompletedTask;
@@ -163,7 +163,7 @@ namespace FlypackBot.Application.Handlers
             var text = message.Query.ToLower();
             var packages = await _flypack.GetCurrentPackagesAsync(message.From.Id, cancellationToken);
 
-            if (packages == null)
+            if (packages is null)
             {
                 await client.AnswerInlineQueryAsync(message.Id, Array.Empty<InlineQueryResultArticle>(), cancellationToken: cancellationToken);
                 return;

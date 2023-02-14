@@ -25,8 +25,7 @@ namespace FlypackBot.Application.Services
         private IDictionary<long, SecondaryUser> _secondaryUsers = new Dictionary<long, SecondaryUser>();
         private readonly UserRepository _repository;
 
-        public UserCacheService(UserRepository userRepository)
-            => _repository = userRepository;
+        public UserCacheService(UserRepository userRepository) => _repository = userRepository;
 
         public async Task<TelegramUser> GetUserAsync(long identifier, CancellationToken cancellationToken)
         {
