@@ -38,7 +38,6 @@ jobs:
           images: abrahamduran/flypack-bot
           tags: |
             type=semver,pattern={{version}}
-            type=semver,pattern={{version}},preffix=v,suffix=-alpha
             type=raw,value=latest
 
       - name: Build and push Docker images
