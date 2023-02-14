@@ -37,13 +37,9 @@ jobs:
         with:
           images: abrahamduran/flypack-bot
           tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,suffix=-{{base_ref}},event=pr
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
+            type=semver,pattern={{version}},preffix=v,suffix=-alpha
+            type=raw,value=latest
 
       - name: Build and push Docker images
         uses: docker/build-push-action@v4
