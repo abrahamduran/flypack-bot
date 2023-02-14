@@ -71,7 +71,7 @@ namespace FlypackBot
             _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, _userCache, HandleExceptionAsync, _logger), cancellationToken);
 
             // Store Changes Periodically
-            _timer?.Change(TimeSpan.FromHours(1), TimeSpan.FromHours(1));
+            _timer?.Change(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
         }
 
         public override async Task StopAsync(CancellationToken cancellationToken)
