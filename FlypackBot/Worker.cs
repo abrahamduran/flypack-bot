@@ -68,7 +68,7 @@ namespace FlypackBot
             _telegram.StartReceiving(new TelegramUpdateHandler(_flypack, _session, _userCache, _settings, _startCommand, _stopCommand, _packagesCommand, _updatePasswordCommand, _parser, HandleExceptionAsync, _logger), receiverOptions, cancellationToken);
 
             // Flypack
-            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, _userCache, HandleExceptionAsync, _logger), cancellationToken);
+            _flypack.StartReceiving(new FlypackUpdateHandler(_telegram, _settings, _parser, HandleExceptionAsync, _logger), cancellationToken);
 
             // Store Changes Periodically
             _timer?.Change(TimeSpan.FromMinutes(30), TimeSpan.FromMinutes(30));
